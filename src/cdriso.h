@@ -24,6 +24,21 @@
 void cdrIsoInit(void);
 int cdrIsoActive(void);
 
+///////////////////////////////////////////////////////////////////////////////
+//senquack - Functions added for ECM support (cdrecm.cpp)
+
+// If a CD image decoder is asked to read non-encoded tracks in a CUE file,
+//  i.e. separate audio tracks, it needs access to the normal read function:
+// TODO: make code more intelligent so it doesn't ask decoder functions
+//  to read non-encoded sectors
+int cdread_normal(FILE *f, unsigned int base, void *dest, int sector);
+
+// A CD image decoder uses this to determine if file it is asked to read
+//  is different than the main (encoded) track, i.e. CD audio tracks.
+FILE* GetCdFileHandle();
+///////////////////////////////////////////////////////////////////////////////
+
+
 extern unsigned int cdrIsoMultidiskCount;
 extern unsigned int cdrIsoMultidiskSelect;
 

@@ -73,7 +73,7 @@ OBJS = \
 	obj/psxcounters.o obj/psxdma.o obj/psxbios.o obj/psxhle.o \
 	obj/interpreter/$(INTERPRETER)/psxinterpreter.o \
 	obj/mdec.o obj/decode_xa.o \
-	obj/cdriso.o obj/cdrom.o obj/ppf.o \
+	obj/cdriso.o obj/cdrecm.o obj/cdrom.o obj/ppf.o \
 	obj/sio.o obj/pad.o
 
 OBJS += obj/gte/$(GTE)/gte.o

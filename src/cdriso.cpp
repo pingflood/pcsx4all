@@ -26,7 +26,8 @@
 #include "plugins.h"
 #include "cdrom.h"
 #include "cdriso.h"
-#include "ppf.h"
+#include "cdrecm.h"    // .ECM image support (CD error correction data stripped)
+#include "ppf.h"       // .PPF patch file support (versions 1,2,3)
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -43,6 +44,7 @@
 #endif
 #include <errno.h>
 #include <zlib.h>
+#include <climits>
 
 #define OFF_T_MSB ((off_t)1 << (sizeof(off_t) * 8 - 1))
 
@@ -102,7 +104,7 @@ typedef struct {
 
 static COMPR_IMG *compr_img;
 
-int (*cdimg_read_func)(FILE *f, unsigned int base, void *dest, int sector);
+static int (*cdimg_read_func)(FILE *f, unsigned int base, void *dest, int sector);
 
 char* CDR__getDriveLetter(void);
 long CDR__configure(void);
@@ -133,6 +135,17 @@ static struct trackinfo ti[MAXTRACKS];
 
 static char IsoFile[MAXPATHLEN] = "";
 static s64 cdOpenCaseTime = 0;
+
+//senquack - Added so cdread_ecm_decode() in cdrecm.cpp can tell when it is
+// asked to read tracks past the first track (only one ECM track is
+// supported by PCSX Reloaded code)
+// TODO: add support for multiple ECM tracks in a CUE file
+// TODO: do not call cdread_ecm_decode() when reading non-ECM tracks, so
+//       it doesn't need access to cdHandle at all
+FILE* GetCdFileHandle()
+{
+	return cdHandle;
+}
 
 // for CD swap
 int ReloadCdromPlugin()
@@ -716,15 +729,20 @@ static int parsecue(const char *isofile) {
 			if (strstr(linebuf, "AUDIO") != NULL) {
 				ti[numtracks].type = CDDA;
 				sector_size = 2352;
-			}
-			else if (sscanf(linebuf, " TRACK %u MODE%u/%u", &t, &mode, &sector_size) == 3)
+			} else if (sscanf(linebuf, " TRACK %u MODE%u/%u", &t, &mode, &sector_size) == 3) {
 				ti[numtracks].type = DATA;
-			else {
+
+				s32 accurate_len;
+				// detect if ECM or compressed & get accurate length
+				if (handleecm(filepath, cdHandle, &accurate_len) == 0) {
+					file_len = accurate_len;
+				}
+			} else {
 				printf(".cue: failed to parse TRACK\n");
 				ti[numtracks].type = numtracks == 1 ? DATA : CDDA;
 			}
-			if (sector_size == 0)
-				sector_size = 2352;
+			if (sector_size == 0) // TODO isMode1ISO?
+				sector_size = CD_FRAMESIZE_RAW;
 		}
 		else if (!strcmp(token, "INDEX")) {
 			if (sscanf(linebuf, " INDEX %02d %8s", &t, time) != 2)
@@ -788,8 +806,10 @@ static int parsecue(const char *isofile) {
 				printf(("\ncould not open: %s\n"), filepath);
 				continue;
 			}
+
+			// File length, compressed audio length will be calculated in AUDIO tag
 			fseek(ti[numtracks + 1].handle, 0, SEEK_END);
-			file_len = ftell(ti[numtracks + 1].handle) / 2352;
+			file_len = ftell(ti[numtracks + 1].handle) / CD_FRAMESIZE_RAW;
 
 			if (numtracks == 0 && strlen(isofile) >= 4 &&
 				strcmp(isofile + strlen(isofile) - 4, ".cue") == 0)
@@ -1274,7 +1294,7 @@ static int opensbifile(const char *isoname) {
 	return LoadSBI(sbiname, s);
 }
 
-static int cdread_normal(FILE *f, unsigned int base, void *dest, int sector)
+int cdread_normal(FILE *f, unsigned int base, void *dest, int sector)
 {
 	fseek(f, base + sector * CD_FRAMESIZE_RAW, SEEK_SET);
 	return fread(dest, 1, CD_FRAMESIZE_RAW, f);
@@ -1479,6 +1499,10 @@ long CDR_open(void) {
 		printf("[cbin]");
 		CDR_getBuffer = CDR_getBuffer_compr;
 		cdimg_read_func = cdread_compressed;
+	}
+	else if ((handleecm(GetIsoFile(), cdHandle, NULL) == 0)) {
+		printf("[ecm]");
+		cdimg_read_func = cdread_ecm_decode;
 	}
 
 	if (!subChanMixed && opensubfile(GetIsoFile()) == 0) {
