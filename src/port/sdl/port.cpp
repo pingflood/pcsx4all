@@ -1219,14 +1219,14 @@ void port_printf(int x, int y, const char *text)
 	unsigned short *screen = (SCREEN + x + y * 320);
 	for (int i = 0; i < strlen(text); i++) {
 		for (int l = 0; l < 8; l++) {
-			screen[l*320+0]=(fontdata8x8[((text[i])*8)+l]&0x80)?0xffff:0x0000;
-			screen[l*320+1]=(fontdata8x8[((text[i])*8)+l]&0x40)?0xffff:0x0000;
-			screen[l*320+2]=(fontdata8x8[((text[i])*8)+l]&0x20)?0xffff:0x0000;
-			screen[l*320+3]=(fontdata8x8[((text[i])*8)+l]&0x10)?0xffff:0x0000;
-			screen[l*320+4]=(fontdata8x8[((text[i])*8)+l]&0x08)?0xffff:0x0000;
-			screen[l*320+5]=(fontdata8x8[((text[i])*8)+l]&0x04)?0xffff:0x0000;
-			screen[l*320+6]=(fontdata8x8[((text[i])*8)+l]&0x02)?0xffff:0x0000;
-			screen[l*320+7]=(fontdata8x8[((text[i])*8)+l]&0x01)?0xffff:0x0000;
+			if (fontdata8x8[((text[i])*8)+l]&0x80) screen[l*320+0]=0xffff; //:0x0000;
+			if (fontdata8x8[((text[i])*8)+l]&0x40) screen[l*320+1]=0xffff; //:0x0000;
+			if (fontdata8x8[((text[i])*8)+l]&0x20) screen[l*320+2]=0xffff; //:0x0000;
+			if (fontdata8x8[((text[i])*8)+l]&0x10) screen[l*320+3]=0xffff; //:0x0000;
+			if (fontdata8x8[((text[i])*8)+l]&0x08) screen[l*320+4]=0xffff; //:0x0000;
+			if (fontdata8x8[((text[i])*8)+l]&0x04) screen[l*320+5]=0xffff; //:0x0000;
+			if (fontdata8x8[((text[i])*8)+l]&0x02) screen[l*320+6]=0xffff; //:0x0000;
+			if (fontdata8x8[((text[i])*8)+l]&0x01) screen[l*320+7]=0xffff; //:0x0000;
 		}
 		screen += 8;
 	}

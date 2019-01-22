@@ -1,4 +1,4 @@
-TARGET = pcsx4all
+TARGET = pcsx4all/pcsx4all.dge
 PORT   = sdl
 
 # If V=1 was passed to 'make', don't hide commands:
