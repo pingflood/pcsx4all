@@ -1,7 +1,7 @@
 *.o
 obj
 *.swp
-pcsx4all*
+*.dge
 stdin.txt
 stdout.txt
 *.mcr
