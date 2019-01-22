@@ -13,6 +13,7 @@
 #include "cdrom.h"
 #include "cdriso.h"
 #include <SDL.h>
+#include <SDL_image.h>
 
 /* PATH_MAX inclusion */
 #ifdef __MINGW32__
@@ -48,6 +49,8 @@ static int sshot_img_num;   // Which slot above image is loaded for
 static u32 ret = 0;
 
 static inline void key_reset() { ret = 0; }
+
+SDL_Surface* img = IMG_Load("backdrop.png");
 
 static unsigned int key_read(void)
 {
@@ -242,6 +245,7 @@ char *FileReq(char *dir, const char *ext, char *result)
 		keys = key_read();
 
 		video_clear();
+		video_blit(img);
 
 		if (keys & KEY_SELECT) {
 			FREE_LIST();
@@ -348,11 +352,11 @@ char *FileReq(char *dir, const char *ext, char *result)
 		while (row < num_items && row < MENU_HEIGHT) {
 			if (row == (cursor_pos - first_visible)) {
 				// draw cursor
-				port_printf(MENU_X + 16, MENU_LS + (10 * row), "-->");
+				port_printf(MENU_X, MENU_LS + (10 * row), ">>");
 			}
 
-			if (filereq_dir_items[row + first_visible].type == 0)
-				port_printf(MENU_X, MENU_LS + (10 * row), "DIR");
+			// if (filereq_dir_items[row + first_visible].type == 0)
+			// 	port_printf(MENU_X, MENU_LS + (10 * row), "DIR");
 			int len = strlen(filereq_dir_items[row + first_visible].name);
 			if (len > 32) {
 				snprintf(tmp_string, 16, "%s", filereq_dir_items[row + first_visible].name);
@@ -360,7 +364,15 @@ char *FileReq(char *dir, const char *ext, char *result)
 				strcat(tmp_string, &filereq_dir_items[row + first_visible].name[len - 15]);
 			} else
 			snprintf(tmp_string, 33, "%s", filereq_dir_items[row + first_visible].name);
-			port_printf(MENU_X + (8 * 5), MENU_LS + (10 * row), tmp_string);
+
+
+			if (filereq_dir_items[row + first_visible].type == 0) {
+				char dir_string[41];
+				snprintf(dir_string, 33, "[%s]", tmp_string);
+				snprintf(tmp_string, 33, "%s", &dir_string);
+			}
+
+			port_printf(MENU_X + (8 * 3), MENU_LS + (10 * row), tmp_string);
 			row++;
 		}
 		while (row < MENU_HEIGHT)
@@ -406,37 +418,42 @@ static int gui_Credits()
 		u32 keys = key_read();
 
 		video_clear();
+		video_blit(img);
 
 		// check keys
-		if (keys) {
+		if (keys & KEY_B) {
 			key_reset();
 			return 0;
 		}
 
 		// diplay menu
-		port_printf(15 * 8 + 4, 10, "CREDITS:");
-		port_printf( 2 * 8, 30, "pcsx team, pcsx-df team, pcsx-r team");
+		int x = 8, y = 8;
+		port_printf(x, y, "pcsx4all 2.4: " __DATE__ " " __TIME__);
 
-		port_printf( 6 * 8, 50, "Franxis and Chui - PCSX4ALL");
-		port_printf( 4 * 8, 60, "Unai - fast PCSX4ALL GPU plugin");
+		y += 18; port_printf(x, y, "pcsx team, pcsx-df team, pcsx-r team");
 
-		port_printf( 5 * 8, 80, "Ulrich Hecht - psx4all-dingoo");
+		y += 14; port_printf(x, y, "Franxis and Chui: PCSX4ALL");
 
-		port_printf(10 * 8, 90, "notaz - PCSX-ReArmed");
+		y += 14; port_printf(x, y, "Unai: fast PCSX4ALL GPU plugin");
 
-		port_printf( 0 * 8, 110, "Dmitry Smagin - porting and optimizing");
-		port_printf( 0 * 8, 120, "                of mips recompiler,");
-		port_printf( 0 * 8, 130, "                gui coding");
+		y += 14; port_printf(x, y, "Ulrich Hecht: psx4all-dingoo");
 
-		port_printf( 0 * 8, 150, "senquack - fixing polygons in gpu_unai,");
-		port_printf( 0 * 8, 160, "           porting spu and other stuff");
-		port_printf( 0 * 8, 170, "           from pcsx_rearmed and pcsx-r,");
-		port_printf( 0 * 8, 180, "           many fixes and improvements");
+		y += 14; port_printf(x, y, "notaz: PCSX-ReArmed");
 
-		port_printf( 0 * 8, 195, "JohnnyonFlame   - gpu_unai dithering");
-		port_printf( 0 * 8, 205, "                  and other fixes");
+		y += 14; port_printf(x, y, "Dmitry Smagin: porting and optimizing");
+		y += 10; port_printf(x, y, "   of mips recompiler, gui coding");
 
-		port_printf( 0 * 8, 220, "zear         - gui fixing and testing");
+		y += 14; port_printf(x, y, "senquack: fixing polygons in gpu_unai,");
+		y += 10; port_printf(x, y, "   porting spu and other stuff from");
+		y += 10; port_printf(x, y, "   pcsx_rearmed and pcsx-r, many fixes");
+		y += 10; port_printf(x, y, "   and improvements");
+
+		y += 14; port_printf(x, y, "JohnnyonFlame: gpu_unai dithering");
+		y += 10; port_printf(x, y, "   and other fixes");
+
+		y += 14; port_printf(x, y, "zear: gui fixing and testing");
+		y += 14; port_printf(x, y, "Steward-Fu: Initial RetroGame port");
+		y += 14; port_printf(x, y, "pingflood: RetroGame GUI changes");
 
 		video_flip();
 		timer_delay(75);
@@ -456,7 +473,7 @@ static MENUITEM gui_MainMenuItems[] = {
 };
 
 #define MENU_SIZE ((sizeof(gui_MainMenuItems) / sizeof(MENUITEM)) - 1)
-static MENU gui_MainMenu = { MENU_SIZE, 0, 112, 140, (MENUITEM *)&gui_MainMenuItems };
+static MENU gui_MainMenu = { MENU_SIZE, 0, 50, 50, (MENUITEM *)&gui_MainMenuItems };
 
 static int gui_state_save(int slot)
 {
@@ -655,10 +672,10 @@ static int gui_StateSave()
 		{(char *)str_slot[7], &gui_state_save7, NULL, NULL, &gui_state_save_hint7},
 		{(char *)str_slot[8], &gui_state_save8, NULL, NULL, &gui_state_save_hint8},
 		{(char *)str_slot[9], &gui_state_save9, NULL, NULL, &gui_state_save_hint9},
-		{NULL, NULL, NULL, NULL, NULL},
-		{NULL, NULL, NULL, NULL, NULL},
-		{NULL, NULL, NULL, NULL, NULL},
-		{(char *)"Back to main menu    ", &gui_state_save_back, NULL, NULL, NULL},
+		// {NULL, NULL, NULL, NULL, NULL},
+		// {NULL, NULL, NULL, NULL, NULL},
+		// {NULL, NULL, NULL, NULL, NULL},
+		// {(char *)"Back to main menu    ", &gui_state_save_back, NULL, NULL, NULL},
 		{0}
 	};
 
@@ -849,11 +866,11 @@ static int gui_StateLoad()
 					newest_mtime = mtime;
 				}
 			}
-		} else {
-			str_slot[i] = NULL;
-			// Initial position points to a file that doesn't exist?
-			if (initial_pos == i)
-				initial_pos = -1;
+		// } else {
+		// 	str_slot[i] = NULL;
+		// 	// Initial position points to a file that doesn't exist?
+		// 	if (initial_pos == i)
+		// 		initial_pos = -1;
 		}
 	}
 
@@ -873,10 +890,10 @@ static int gui_StateLoad()
 		{(char *)str_slot[7], &gui_state_load7, NULL, NULL, &gui_state_load_hint7},
 		{(char *)str_slot[8], &gui_state_load8, NULL, NULL, &gui_state_load_hint8},
 		{(char *)str_slot[9], &gui_state_load9, NULL, NULL, &gui_state_load_hint9},
-		{NULL, NULL, NULL, NULL, NULL},
-		{NULL, NULL, NULL, NULL, NULL},
-		{NULL, NULL, NULL, NULL, NULL},
-		{(char *)"Back to main menu    ", &gui_state_load_back, NULL, NULL, NULL},
+		// {NULL, NULL, NULL, NULL, NULL},
+		// {NULL, NULL, NULL, NULL, NULL},
+		// {NULL, NULL, NULL, NULL, NULL},
+		// {(char *)"Back to main menu    ", &gui_state_load_back, NULL, NULL, NULL},
 		{0}
 	};
 
@@ -938,7 +955,7 @@ static int gui_select_multicd(bool swapping_cd)
 		for (int row=0; row < num_rows; ++row) {
 			if (row == cursor_pos) {
 				// draw cursor
-				port_printf(MENU_X + 16, MENU_LS + 10 + (10 * row), "-->");
+				port_printf(MENU_X + 16, MENU_LS + 10 + (10 * row), ">>");
 			}
 
 			sprintf(tmp_string, "CD %d", (row+1));
@@ -1045,15 +1062,15 @@ static int gui_swap_cd(void)
 }
 
 static MENUITEM gui_GameMenuItems[] = {
-	{(char *)"Swap CD", &gui_swap_cd, NULL, NULL, NULL},
 	{(char *)"Load state", &gui_StateLoad, NULL, NULL, NULL},
 	{(char *)"Save state", &gui_StateSave, NULL, NULL, NULL},
+	{(char *)"Swap CD", &gui_swap_cd, NULL, NULL, NULL},
 	{(char *)"Quit", &gui_Quit, NULL, NULL, NULL},
 	{0}
 };
 
 #define GMENU_SIZE ((sizeof(gui_GameMenuItems) / sizeof(MENUITEM)) - 1)
-static MENU gui_GameMenu = { GMENU_SIZE, 0, 112, 120, (MENUITEM *)&gui_GameMenuItems };
+static MENU gui_GameMenu = { GMENU_SIZE, 0, 50, 50, (MENUITEM *)&gui_GameMenuItems };
 
 #ifdef PSXREC
 static int emu_alter(u32 keys)
@@ -1146,7 +1163,7 @@ static char *RCntFix_show()
 
 static void RCntFix_hint()
 {
-	port_printf(2 * 8 - 4, 10 * 8, "Parasite Eve 2, Vandal Hearts 1/2 Fix");
+	port_printf(2 * 8 - 4, 200, "Parasite Eve 2, Vandal Hearts 1/2 Fix");
 }
 
 static int VSyncWA_alter(u32 keys)
@@ -1162,7 +1179,7 @@ static int VSyncWA_alter(u32 keys)
 
 static void VSyncWA_hint()
 {
-	port_printf(6 * 8, 10 * 8, "InuYasha Sengoku Battle Fix");
+	port_printf(6 * 8, 200, "InuYasha Sengoku Battle Fix");
 }
 
 static char *VSyncWA_show()
@@ -1207,13 +1224,13 @@ static MENUITEM gui_SettingsItems[] = {
 	{(char *)"RCntFix              ", NULL, &RCntFix_alter, &RCntFix_show, &RCntFix_hint},
 	{(char *)"VSyncWA              ", NULL, &VSyncWA_alter, &VSyncWA_show, &VSyncWA_hint},
 	{(char *)"Restore defaults     ", &settings_defaults, NULL, NULL, NULL},
-	{NULL, NULL, NULL, NULL, NULL},
-	{(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
+	// {NULL, NULL, NULL, NULL, NULL},
+	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
 	{0}
 };
 
 #define SET_SIZE ((sizeof(gui_SettingsItems) / sizeof(MENUITEM)) - 1)
-static MENU gui_SettingsMenu = { SET_SIZE, 0, 56, 112, (MENUITEM *)&gui_SettingsItems };
+static MENU gui_SettingsMenu = { SET_SIZE, 0, 50, 50, (MENUITEM *)&gui_SettingsItems };
 
 static int fps_alter(u32 keys)
 {
@@ -1451,13 +1468,13 @@ static MENUITEM gui_GPUSettingsItems[] = {
 	{(char *)"Pixel skip           ", NULL, &pixel_skip_alter, &pixel_skip_show, NULL},
 #endif
 	{(char *)"Restore defaults     ", &gpu_settings_defaults, NULL, NULL, NULL},
-	{NULL, NULL, NULL, NULL, NULL},
-	{(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
+	// {NULL, NULL, NULL, NULL, NULL},
+	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
 	{0}
 };
 
 #define SET_GPUSIZE ((sizeof(gui_GPUSettingsItems) / sizeof(MENUITEM)) - 1)
-static MENU gui_GPUSettingsMenu = { SET_GPUSIZE, 0, 56, 112, (MENUITEM *)&gui_GPUSettingsItems };
+static MENU gui_GPUSettingsMenu = { SET_GPUSIZE, 0, 50, 50, (MENUITEM *)&gui_GPUSettingsItems };
 
 static int xa_alter(u32 keys)
 {
@@ -1666,13 +1683,13 @@ static MENUITEM gui_SPUSettingsItems[] = {
 	{(char *)"Master volume        ", NULL, &volume_alter, &volume_show, NULL},
 #endif
 	{(char *)"Restore defaults     ", &spu_settings_defaults, NULL, NULL, NULL},
-	{NULL, NULL, NULL, NULL, NULL},
-	{(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
+	// {NULL, NULL, NULL, NULL, NULL},
+	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
 	{0}
 };
 
 #define SET_SPUSIZE ((sizeof(gui_SPUSettingsItems) / sizeof(MENUITEM)) - 1)
-static MENU gui_SPUSettingsMenu = { SET_SPUSIZE, 0, 56, 112, (MENUITEM *)&gui_SPUSettingsItems };
+static MENU gui_SPUSettingsMenu = { SET_SPUSIZE, 0, 50, 50, (MENUITEM *)&gui_SPUSettingsItems };
 
 static int gui_LoadIso()
 {
@@ -1745,11 +1762,11 @@ static void ShowMenu(MENU *menu)
 	}
 
 	// show cursor
-	port_printf(menu->x - 3 * 8, menu->y + menu->cur * 10, "-->");
+	port_printf(menu->x - 3 * 8, menu->y + menu->cur * 10, ">>");
 
 	// general copyrights info
-	port_printf( 8 * 8, 10, "pcsx4all 2.4 for GCW-Zero");
-	port_printf( 4 * 8, 20, "Built on " __DATE__ " at " __TIME__);
+	port_printf( (320 - 12 * 8) / 2, 10, "pcsx4all 2.4");
+	// port_printf( 4 * 8, 220, "Built on " __DATE__ " at " __TIME__);
 }
 
 static int gui_RunMenu(MENU *menu)
@@ -1762,6 +1779,8 @@ static int gui_RunMenu(MENU *menu)
 		keys = key_read();
 
 		video_clear();
+
+		video_blit(img);
 
 		// check keys
 		if (keys & KEY_SELECT) {
