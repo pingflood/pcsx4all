@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <assert.h>
+#include <SDL.h>
 
 ///////////////////////////
 // Windows compatibility //
@@ -27,6 +28,7 @@ void wait_ticks(unsigned s);
 void pad_update(void);
 unsigned short pad_read(int num);
 
+void video_blit(SDL_Surface *src);
 void video_flip(void);
 #ifdef GPU_DFXVIDEO
 void video_set(unsigned short* pVideo,unsigned int width,unsigned int height);
