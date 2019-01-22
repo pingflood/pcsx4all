@@ -1,4 +1,4 @@
-TARGET = pcsx4all
+TARGET = pcsx4all/pcsx4all.dge
 PORT   = sdl
 
 # Using 'gpulib' adapted from PCSX Rearmed is default, specify
