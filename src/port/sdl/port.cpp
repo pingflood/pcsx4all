@@ -557,9 +557,9 @@ unsigned short pad_read(int num)
 	return (num == 0 ? pad1 : pad2);
 }
 
-void video_blit(SDL_Surface *src)
+void video_blit(void *src)
 {
-	SDL_BlitSurface(src, NULL, screen, NULL);
+	SDL_BlitSurface((SDL_Surface*)src, NULL, screen, NULL);
 }
 
 void video_flip(void)
