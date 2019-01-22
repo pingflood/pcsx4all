@@ -1,0 +1,6 @@
+title=PlayStation
+description=PCSX4ALL Emulator
+exec=/home/retrofw/emus/pcsx4all/pcsx4all.dge
+params=-iso
+selectordir=/home/retrofw/roms/psx
+selectorfilter=.iso,.cue,.pbp

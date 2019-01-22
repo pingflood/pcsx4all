@@ -215,7 +215,7 @@ $(sort $(OBJDIRS)):
 
 ipk: all
 	@rm -rf /tmp/.pcsx4all-ipk/ && mkdir -p /tmp/.pcsx4all-ipk/root/home/retrofw/emus/pcsx4all /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/systems
-	@cp -r pcsx4all/pcsx4all.dge pcsx4all/pcsx4all.png /tmp/.pcsx4all-ipk/root/home/retrofw/emus/pcsx4all
+	@cp -r pcsx4all/pcsx4all.dge pcsx4all/pcsx4all.png pcsx4all/backdrop.png /tmp/.pcsx4all-ipk/root/home/retrofw/emus/pcsx4all
 	@cp pcsx4all/pcsx4all.lnk /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators
 	@cp pcsx4all/ps1.pcsx4all.lnk /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/systems
 	@sed "s/^Version:.*/Version: $$(date +%Y%m%d)/" pcsx4all/control > /tmp/.pcsx4all-ipk/control

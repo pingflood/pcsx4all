@@ -2,6 +2,7 @@
 obj
 *.swp
 *.dge
+*.ipk
 stdin.txt
 stdout.txt
 *.mcr
