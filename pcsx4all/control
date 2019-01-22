@@ -1,0 +1,10 @@
+Package: pcsx4all
+Version: 
+Description: RetroGame port of pcsx4all
+Section: emus
+Priority: optional
+Maintainer: pingflood
+Architecture: mipsel
+Homepage: https://github.com/pingflood/pcsx4all
+Depends:
+Source: https://github.com/pingflood/pcsx4all
