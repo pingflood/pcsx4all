@@ -553,6 +553,11 @@ unsigned short pad_read(int num)
 	return (num == 0 ? pad1 : pad2);
 }
 
+void video_blit(SDL_Surface *src)
+{
+	SDL_BlitSurface(src, NULL, screen, NULL);
+}
+
 void video_flip(void)
 {
 	if (emu_running && Config.ShowFps) {
