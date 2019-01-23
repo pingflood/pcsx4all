@@ -561,7 +561,7 @@ unsigned short pad_read(int num)
 void video_blit(void *src)
 {
 	if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-	SDL_BlitSurface(src, NULL, screen, NULL);
+	SDL_BlitSurface((SDL_Surface*)src, NULL, screen, NULL);
 	if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
 }
 
