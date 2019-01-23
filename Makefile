@@ -3,7 +3,7 @@ PORT   = sdl
 
 # Using 'gpulib' adapted from PCSX Rearmed is default, specify
 #  USE_GPULIB=0 as param to 'make' when building to disable it.
-USE_GPULIB ?= 0
+USE_GPULIB ?= 1
 
 #GPU   = gpu_dfxvideo
 #GPU   = gpu_drhell

@@ -488,6 +488,7 @@ static int gui_state_save(int slot)
 	saveslot = slot;
 
 	video_clear();
+	video_blit(img);
 	port_printf(160-(6*8/2), 120-(8/2), "SAVING");
 	video_flip();
 
@@ -497,6 +498,7 @@ static int gui_state_save(int slot)
 		for (;;) {
 			u32 keys = key_read();
 			video_clear();
+			video_blit(img);
 			// check keys
 			if (keys) {
 				key_reset();
@@ -943,6 +945,7 @@ static int gui_select_multicd(bool swapping_cd)
 
 	for (;;) {
 		video_clear();
+		video_blit(img);
 		u32 keys = key_read();
 
 		if ((swapping_cd) && (keys & KEY_B)) {
