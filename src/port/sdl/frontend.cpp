@@ -248,7 +248,7 @@ char *FileReq(char *dir, const char *ext, char *result)
 		video_clear();
 		video_blit(img);
 
-		if (keys & KEY_SELECT) {
+		if (keys & KEY_B) {
 			FREE_LIST();
 			key_reset();
 			return NULL;
@@ -342,10 +342,10 @@ char *FileReq(char *dir, const char *ext, char *result)
 				key_reset();
 				return result;
 			}
-		} else if (keys & KEY_B) {
-			cursor_pos = 0;
-			first_visible = 0;
-			key_reset();
+		// } else if (keys & KEY_B) {
+		// 	cursor_pos = 0;
+		// 	first_visible = 0;
+		// 	key_reset();
 		}
 
 		// display directory contents
@@ -944,7 +944,7 @@ static int gui_select_multicd(bool swapping_cd)
 		video_clear();
 		u32 keys = key_read();
 
-		if ((swapping_cd) && (keys & KEY_SELECT)) {
+		if ((swapping_cd) && (keys & KEY_B)) {
 			key_reset();
 			return 0;
 		}
@@ -1809,7 +1809,7 @@ static int gui_RunMenu(MENU *menu)
 		video_blit(img);
 
 		// check keys
-		if (keys & KEY_SELECT) {
+		if (keys & KEY_B) {
 			key_reset();
 			return 0;
 		} else if (keys & KEY_UP) {
@@ -1830,9 +1830,9 @@ static int gui_RunMenu(MENU *menu)
 				if (result)
 					return result;
 			}
-		} else if (keys & KEY_B) {
-			menu->cur = menu->num - 1;
-			key_reset();
+		// } else if (keys & KEY_B) {
+		// 	menu->cur = menu->num - 1;
+		// 	key_reset();
 		}
 
 		if ((keys & (KEY_LEFT | KEY_RIGHT)) && mi->on_press) {
