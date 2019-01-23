@@ -465,7 +465,7 @@ static int gui_Credits()
 }
 
 static MENUITEM gui_MainMenuItems[] = {
-	{(char *)"Load game", &gui_LoadIso, NULL, NULL, NULL},
+	// {(char *)"Load game", &gui_LoadIso, NULL, NULL, NULL},
 	{(char *)"Core settings", &gui_Settings, NULL, NULL, NULL},
 	{(char *)"GPU settings", &gui_GPUSettings, NULL, NULL, NULL},
 	{(char *)"SPU settings", &gui_SPUSettings, NULL, NULL, NULL},
