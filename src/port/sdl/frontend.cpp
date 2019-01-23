@@ -1780,7 +1780,6 @@ static int gui_RunMenu(MENU *menu)
 		keys = key_read();
 
 		video_clear();
-
 		video_blit(img);
 
 		// check keys

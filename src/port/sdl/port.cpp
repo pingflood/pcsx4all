@@ -9,6 +9,7 @@
 #include "plugin_lib.h"
 #include "perfmon.h"
 #include <SDL.h>
+#include <SDL_image.h>
 
 /* PATH_MAX inclusion */
 #ifdef __MINGW32__
@@ -555,7 +556,9 @@ unsigned short pad_read(int num)
 
 void video_blit(void *src)
 {
-	SDL_BlitSurface((SDL_Surface*)src, NULL, screen, NULL);
+	if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+	SDL_BlitSurface(src, NULL, screen, NULL);
+	if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
 }
 
 void video_flip(void)
