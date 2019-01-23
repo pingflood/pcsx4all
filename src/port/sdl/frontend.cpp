@@ -639,12 +639,12 @@ static int gui_StateSave()
 {
 	const char* str_slot[10];
 	const char* str_slot_unused[10] = {
-		"Empty slot 0", "Empty slot 1", "Empty slot 2", "Empty slot 3", "Empty slot 4",
-		"Empty slot 5", "Empty slot 6", "Empty slot 7", "Empty slot 8", "Empty slot 9",
+		"Free slot 0", "Free slot 1", "Free slot 2", "Free slot 3", "Free slot 4",
+		"Free slot 5", "Free slot 6", "Free slot 7", "Free slot 8", "Free slot 9",
 	};
 	const char* str_slot_used[10] = {
-		"Used  slot 0", "Used  slot 1", "Used  slot 2", "Used  slot 3", "Used  slot 4",
-		"Used  slot 5", "Used  slot 6", "Used  slot 7", "Used  slot 8", "Used  slot 9",
+		"Used slot 0", "Used slot 1", "Used slot 2", "Used slot 3", "Used slot 4",
+		"Used slot 5", "Used slot 6", "Used slot 7", "Used slot 8", "Used slot 9",
 	};
 
 	// Restore last accessed position
