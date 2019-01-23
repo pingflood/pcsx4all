@@ -33,7 +33,7 @@
 #include "gpu/gpu_unai/gpu.h"
 #endif
 
-#define timer_delay(a)	wait_ticks(a*1000)
+#define timer_delay(a)	void(); //wait_ticks(a*1000)
 
 enum  {
 	KEY_UP=0x1,	KEY_LEFT=0x4,		KEY_DOWN=0x10,	KEY_RIGHT=0x40,
@@ -56,7 +56,8 @@ static unsigned int key_read(void)
 {
 	SDL_Event event;
 
-	while (SDL_PollEvent(&event))  {
+	// while (SDL_PollEvent(&event))  {
+	SDL_WaitEvent(&event);  {
 		switch (event.type) {
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
