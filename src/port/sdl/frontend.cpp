@@ -43,7 +43,7 @@ enum  {
 };
 
 extern char sstatesdir[PATH_MAX];
-static int saveslot = -1;
+static int saveslot = 0;//-1;
 static uint16_t* sshot_img; // Ptr to active image in savestate menu
 static int sshot_img_num;   // Which slot above image is loaded for
 
@@ -576,16 +576,16 @@ static void gui_state_save_hint(int slot)
 	// Display screenshot image
 	if (sshot_img) {
 		x = 160-8;
-		y = 70;
-		int dst_stride = 320;
+		y = 45;
+		const int dst_stride = 320;
 		uint16_t *dst = (uint16_t*)SCREEN + y * dst_stride + x;
 		for (int j=0; j < 120; ++j) {
 			memcpy((void*)dst, (void*)(sshot_img + j*160), 160*2);
 			dst += dst_stride;
 		}
 	} else {
-		port_printf(320-135, 125 - 10, "No screenshot");
-		port_printf(320-135, 125,      "  available  ");
+		port_printf(320-135, 105 - 10, "No screenshot");
+		port_printf(320-135, 105,      "  available  ");
 	}
 
 	// Display date of last modification
@@ -594,7 +594,7 @@ static void gui_state_save_hint(int slot)
 	if (FileDate(fullpath, date_str, NULL) >= 0) {
 		len = strlen(date_str);
 		x = 320 - 8 - len * 8;
-		y = 70 - 22;
+		y = 170;
 		port_printf(x, y, date_str);
 	}
 
@@ -603,7 +603,7 @@ static void gui_state_save_hint(int slot)
 	if (len > 25)
 		filename[25] = '\0';
 	x = 320 - 8 - len * 8;
-	y = 70 - 11;
+	y = 180;
 	port_printf(x, y, filename);
 }
 
@@ -689,7 +689,7 @@ static int gui_StateSave()
 	if (initial_pos < 0)
 		initial_pos = menu_size-1;
 
-	MENU gui_StateSaveMenu = { menu_size, initial_pos, 30, 80, (MENUITEM *)&gui_StateSaveItems };
+	MENU gui_StateSaveMenu = { menu_size, initial_pos, 50, 50, (MENUITEM *)&gui_StateSaveItems };
 
 	int ret = gui_RunMenu(&gui_StateSaveMenu);
 
@@ -785,7 +785,7 @@ static void gui_state_load_hint(int slot)
 	// Display screenshot image
 	if (sshot_img) {
 		x = 160-8;
-		y = 70;
+		y = 45;
 		const int dst_stride = 320;
 		uint16_t *dst = (uint16_t*)SCREEN + y * dst_stride + x;
 		for (int j=0; j < 120; ++j) {
@@ -803,7 +803,7 @@ static void gui_state_load_hint(int slot)
 	if (FileDate(fullpath, date_str, NULL) >= 0) {
 		len = strlen(date_str);
 		x = 320 - 8 - len * 8;
-		y = 70 - 22;
+		y = 170;
 		port_printf(x, y, date_str);
 	}
 
@@ -812,7 +812,7 @@ static void gui_state_load_hint(int slot)
 	if (len > 25)
 		filename[25] = '\0';
 	x = 320 - 8 - len * 8;
-	y = 70 - 11;
+	y = 180;
 	port_printf(x, y, filename);
 }
 
@@ -907,7 +907,7 @@ static int gui_StateLoad()
 	if (initial_pos < 0)
 		initial_pos = menu_size-1;
 
-	MENU gui_StateLoadMenu = { menu_size, initial_pos, 30, 80, (MENUITEM *)&gui_StateLoadItems };
+	MENU gui_StateLoadMenu = { menu_size, initial_pos, 50, 50, (MENUITEM *)&gui_StateLoadItems };
 
 	int ret = gui_RunMenu(&gui_StateLoadMenu);
 
