@@ -3,4 +3,4 @@ description=PSOne Emulator
 exec=/home/retrofw/emus/pcsx4all/pcsx4all.dge
 params=-iso
 selectordir=/home/retrofw/roms/psx
-selectorfilter=.iso,.cue,.pbp
+selectorfilter=.bin,.img,.mdf,.iso,.cue,.pbp,.cbn
