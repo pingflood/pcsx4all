@@ -50,7 +50,8 @@ enum {
 	DKEY_TOTAL
 };
 
-static SDL_Surface *screen;
+// static SDL_Surface *screen;
+SDL_Surface *screen;
 unsigned short *SCREEN;
 
 static bool pcsx4all_initted = false;

@@ -15,6 +15,13 @@
 #include "port.h"
 #include "gpu.h"
 
+#include <SDL.h>
+#include "plugin_lib.h"
+
+extern SDL_Surface *screen;
+extern struct pl_data_t pl_data;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // BLITTERS TAKEN FROM gpu_unai/gpu_blit.h
 // GPU Blitting code with rescale and interlace support.
@@ -402,11 +409,76 @@ static inline void GPU_BlitWS(const void* src, u16* dst16, bool isRGB24)
 	}
 }
 
+
 // Basically an adaption of old gpu_unai/gpu.cpp's gpuVideoOutput() that
 //  assumes 320x240 destination resolution (for now)
 // TODO: clean up / improve / add HW scaling support
 void vout_update(void)
 {
+
+// 	if (pl_data.sinfo.hres != screen->w || pl_data.sinfo.vres != screen->h)
+// 		// if ((gpu.screen.hres > 0 && gpu.screen.hres != screen->w) || (gpu.screen.vres > 0 && gpu.screen.vres != screen->h))
+// 	{
+// 		if (screen != NULL)
+// 		{
+// screen = SDL_SetVideoMode(gpu.screen.hres, gpu.screen.vres, 16, SDL_HWSURFACE |
+// #ifdef SDL_TRIPLEBUF
+// 	SDL_TRIPLEBUF
+// #else
+// 	SDL_DOUBLEBUF
+// #endif
+// 				);
+// 			SCREEN = (Uint16 *)screen->pixels;
+// 				SDL_Delay(100);
+// 		}
+// 		return;
+// 	}
+
+
+
+
+#if 0
+	if (screen != NULL)
+	{
+		if ((gpu.screen.hres > 0 && gpu.screen.hres != screen->w) || (gpu.screen.vres > 0 && gpu.screen.vres != screen->h))
+		{
+			printf ("cur: %dx%d new: %dx%d \n", screen->w, screen->h, gpu.screen.hres, gpu.screen.vres);
+
+			screen = SDL_SetVideoMode(gpu.screen.hres, gpu.screen.vres, 16, SDL_HWSURFACE |
+#ifdef SDL_TRIPLEBUF
+	SDL_TRIPLEBUF
+#else
+	SDL_DOUBLEBUF
+#endif
+			);
+
+			SCREEN = (Uint16 *)screen->pixels;
+			SDL_Delay(100);
+		}
+
+	u16* dst = (u16*)SCREEN;
+	u16* src = (u16*)gpu.vram;
+	for (int x = 0; x < gpu.screen.hres * gpu.screen.vres; x++)
+		*dst++ = src[x];
+
+	video_flip();
+
+ //  for (int y = 0; y < pl_data.sinfo.vres; y++) {
+ //    for (int x = 0; x < pl_data.sinfo.hres; x ++) {
+ //      *dst++ = src[x];
+ //    }
+ //    src += pl_data.sinfo.hres;
+ //  }
+
+
+
+
+
+		return;
+	}
+return;
+#endif
+
 	const int VIDEO_WIDTH = 320;
 
 	//Debugging:
