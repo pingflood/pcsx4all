@@ -214,13 +214,13 @@ $(sort $(OBJDIRS)):
 	$(HIDECMD)$(MD) $@
 
 ipk: all
-	@rm -rf /tmp/.pcsx4all-ipk/ && mkdir -p /tmp/.pcsx4all-ipk/root/home/retrofw/emus/pcsx4all /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/systems
+	@rm -rf /tmp/.pcsx4all-ipk/ && mkdir -p /tmp/.pcsx4all-ipk/root/home/retrofw/emus/pcsx4all /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators.systems
 	@cp -r pcsx4all/pcsx4all.dge pcsx4all/pcsx4all.png pcsx4all/backdrop.png /tmp/.pcsx4all-ipk/root/home/retrofw/emus/pcsx4all
 	@cp pcsx4all/pcsx4all.lnk /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators
-	@cp pcsx4all/ps1.pcsx4all.lnk /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/systems
+	@cp pcsx4all/ps1.pcsx4all.lnk /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators.systems
 	@cp pcsx4all/conffiles /tmp/.pcsx4all-ipk/
 	@sed "s/^Version:.*/Version: $$(date +%Y%m%d)/" pcsx4all/control > /tmp/.pcsx4all-ipk/control
-	@tar --owner=0 --group=0 -czvf /tmp/.pcsx4all-ipk/control.tar.gz -C /tmp/.pcsx4all-ipk/ control
+	@tar --owner=0 --group=0 -czvf /tmp/.pcsx4all-ipk/control.tar.gz -C /tmp/.pcsx4all-ipk/ control conffiles
 	@tar --owner=0 --group=0 -czvf /tmp/.pcsx4all-ipk/data.tar.gz -C /tmp/.pcsx4all-ipk/root/ .
 	@echo 2.0 > /tmp/.pcsx4all-ipk/debian-binary
 	@ar r pcsx4all/pcsx4all.ipk /tmp/.pcsx4all-ipk/control.tar.gz /tmp/.pcsx4all-ipk/data.tar.gz /tmp/.pcsx4all-ipk/debian-binary
