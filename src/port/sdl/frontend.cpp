@@ -57,8 +57,7 @@ static unsigned int key_read(void)
 {
 	SDL_Event event;
 
-	while (SDL_PollEvent(&event))  {
-	// SDL_WaitEvent(&event);  {
+	if (SDL_WaitEvent(&event)) {
 		switch (event.type) {
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
