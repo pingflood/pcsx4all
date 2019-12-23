@@ -136,14 +136,14 @@ extern u32 cycle_multiplier; // in mips/recompiler.cpp
 void config_load()
 {
 	FILE *f;
-	char *config = (char *)malloc(strlen(homedir) + strlen("/pcsx4all.cfg") + 1);
+	char *config = (char *)malloc(strlen(homedir) + strlen("/pcsx4all.retrofw.cfg") + 1);
 	char line[strlen("LastDir ") + MAXPATHLEN + 1];
 	int lineNum = 0;
 
 	if (!config)
 		return;
 
-	sprintf(config, "%s/pcsx4all.cfg", homedir);
+	sprintf(config, "%s/pcsx4all.retrofw.cfg", homedir);
 
 	f = fopen(config, "r");
 
@@ -329,12 +329,12 @@ void config_load()
 void config_save()
 {
 	FILE *f;
-	char *config = (char *)malloc(strlen(homedir) + strlen("/pcsx4all.cfg") + 1);
+	char *config = (char *)malloc(strlen(homedir) + strlen("/pcsx4all.retrofw.cfg") + 1);
 
 	if (!config)
 		return;
 
-	sprintf(config, "%s/pcsx4all.cfg", homedir);
+	sprintf(config, "%s/pcsx4all.retrofw.cfg", homedir);
 
 	f = fopen(config, "w");
 
