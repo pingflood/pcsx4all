@@ -67,7 +67,7 @@ static void recMULT()
 			const_res = true;
 			lo_res = (s32)res;
 			hi_res = (s32)(res >> 32);
-		} else if ((rs_const && (abs(rs_val) == 1)) || (rt_const && (abs(rt_val) == 1))) {
+		} else if ((rs_const && (abs((int)rs_val) == 1)) || (rt_const && (abs((int)rt_val) == 1))) {
 			// If one of the operands is known to be const-val '+/-1', result is identity
 			//  (with negation if val is -1)
 
@@ -95,15 +95,15 @@ static void recMULT()
 			// If one of the operands is a const power-of-two, we can get result by shifting
 
 			// Determine which operand is const power-of-two value, if any
-			bool rs_pot = rs_const && (rs_val != 0x80000000) && ((abs(rs_val) & (abs(rs_val) - 1)) == 0);
-			bool rt_pot = rt_const && (rt_val != 0x80000000) && ((abs(rt_val) & (abs(rt_val) - 1)) == 0);
+			bool rs_pot = rs_const && (rs_val != 0x80000000) && ((abs((int)rs_val) & (abs((int)rs_val) - 1)) == 0);
+			bool rt_pot = rt_const && (rt_val != 0x80000000) && ((abs((int)rt_val) & (abs((int)rt_val) - 1)) == 0);
 
 			if (rs_pot || rt_pot) {
 				u32 npot_reg_psx = rs_pot ? _Rt_ : _Rs_;
 				u32 npot_reg = regMipsToHost(npot_reg_psx, REG_LOAD, REG_REGISTER);
 
 				// Count trailing 0s of const power-of-two operand to get left-shift amount
-				u32 pot_val = rs_pot ? (u32)abs(rs_val) : (u32)abs(rt_val);
+				u32 pot_val = rs_pot ? (u32)abs((int)rs_val) : (u32)abs((int)rt_val);
 				u32 shift_amt = __builtin_ctz(pot_val);
 
 				u32 work_reg = npot_reg;
@@ -351,13 +351,13 @@ static void recDIV()
 			return;
 		} else {
 			// If divisor is a const power-of-two, we can get result by shifting
-			bool rt_pot = (rt_val != 0x80000000) && ((abs(rt_val) & (abs(rt_val) - 1)) == 0);
+			bool rt_pot = (rt_val != 0x80000000) && ((abs((int)rt_val) & (abs((int)rt_val) - 1)) == 0);
 
 			if (rt_pot) {
 				u32 rs = regMipsToHost(_Rs_, REG_LOAD, REG_REGISTER);
 
 				// Count trailing 0s of const power-of-two divisor to get right-shift amount
-				u32 pot_val = (u32)abs(rt_val);
+				u32 pot_val = (u32)abs((int)rt_val);
 				u32 shift_amt = __builtin_ctz(pot_val);
 
 				u32 work_reg = rs;
