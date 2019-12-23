@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=pcsx4all
+Comment=PSOne Emulator
+Exec=pcsx4all.dge -iso %f
+Icon=pcsx4all
+Categories=emulators;
+X-OD-Manual=psx4all.man.txt
+X-OD-Filter=.bin,.img,.mdf,.iso,.cue,.pbp,.cbn
+Terminal=false
+Type=Application
+StartupNotify=true

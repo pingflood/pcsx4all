@@ -1,16 +1,18 @@
 TARGET = pcsx4all/pcsx4all.dge
 PORT   = sdl
+#A320   = 1
+#GCW0   = 1
+RS97   = 1
 
 # Using 'gpulib' adapted from PCSX Rearmed is default, specify
-#  USE_GPULIB=0 as param to 'make' when building to disable it.
+# USE_GPULIB=0 as param to 'make' when building to disable it.
 USE_GPULIB ?= 1
 
-#GPU   = gpu_dfxvideo
-#GPU   = gpu_drhell
-#GPU   = gpu_null
-GPU   = gpu_unai
-
-SPU   = spu_pcsxrearmed
+#GPU = gpu_dfxvideo
+#GPU = gpu_drhell
+#GPU = gpu_null
+GPU  = gpu_unai
+SPU  = spu_pcsxrearmed
 
 CHAINPREFIX := /opt/mipsel-linux-uclibc
 CROSS_COMPILE := $(CHAINPREFIX)/usr/bin/mipsel-linux-
@@ -33,19 +35,17 @@ SDL_LIBS    := $(shell $(SDL_CONFIG) --libs)
 MCD1_FILE = \"mcd001.mcr\"
 MCD2_FILE = \"mcd002.mcr\"
 
-ifdef A320
-	C_ARCH = -mips32 -msoft-float -DTMPFS_MIRRORING -DTMPFS_DIR=\"/tmp\"
-else
-	#C_ARCH = -mips32r2 -DSHMEM_MIRRORING
-  C_ARCH = -mips32 -DDYNAREC_SKIP_DCACHE_FLUSH -DTMPFS_MIRRORING -DTMPFS_DIR=\"/tmp\" -fpermissive
-endif
+C_ARCH = -mips32 -DDYNAREC_SKIP_DCACHE_FLUSH -DTMPFS_MIRRORING -DTMPFS_DIR=\"/tmp\" -DRS97
+OPTS = -O2 -mno-fp-exceptions -mframe-header-opt -mno-check-zero-division -fno-signed-zeros -fno-trapping-math -mno-interlink-compressed -fno-caller-saves -flto
 
-CFLAGS = $(C_ARCH) -mplt -mno-shared -ggdb3 -O2 -DGCW_ZERO -DTIME_IN_MSEC \
+# CFLAGS = $(C_ARCH) -fno-common -mno-abicalls -fno-PIC -fdata-sections -ffunction-sections $(OPTS) -DGCW_ZERO \
+
+CFLAGS = $(C_ARCH) -fno-common -mno-abicalls -fno-PIC -fdata-sections -ffunction-sections $(OPTS) -DGCW_ZERO \
 	-Wall -Wunused -Wpointer-arith \
 	-Wno-sign-compare -Wno-cast-align \
 	-Isrc -Isrc/spu/$(SPU) -D$(SPU) -Isrc/gpu/$(GPU) \
 	-Isrc/port/$(PORT) \
-	-Isrc/plugin_lib \
+	-Isrc/plugin_lib -Isrc/port/common \
 	-DXA_HACK \
 	-DINLINE="static __inline__" -Dasm="__asm__ __volatile__" \
 	$(SDL_CFLAGS)
@@ -53,17 +53,27 @@ CFLAGS = $(C_ARCH) -mplt -mno-shared -ggdb3 -O2 -DGCW_ZERO -DTIME_IN_MSEC \
 # Convert plugin names to uppercase and make them CFLAG defines
 CFLAGS += -D$(shell echo $(GPU) | tr a-z A-Z)
 CFLAGS += -D$(shell echo $(SPU) | tr a-z A-Z)
+CFLAGS += -DFORCE_MEMCPY32
 
 ifdef RECOMPILER
 CFLAGS += -DPSXREC -D$(RECOMPILER)
 endif
 
-LDFLAGS = $(SDL_LIBS) -lSDL_mixer -lSDL_image -lrt -lz
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti -nostdinc++ 
+
+LDFLAGS = -nodefaultlibs -lc -lgcc -lSDL -lz -Wl,--as-needed -Wl,--gc-sections -flto -s
+LDFLAGS += $(SDL_LIBS) -lSDL_mixer -lSDL_image -lrt
+
+OBJDIRS = obj obj/gpu obj/gpu/$(GPU) obj/spu obj/spu/$(SPU) \
+	  obj/recompiler obj/recompiler/$(RECOMPILER) \
+	  obj/port obj/port/$(PORT) \
+	  obj/plugin_lib obj/port/common
 
 OBJDIRS = obj obj/gpu obj/gpu/$(GPU) obj/spu obj/spu/$(SPU) \
 	  obj/recompiler obj/recompiler/$(RECOMPILER) \
 	  obj/port obj/port/$(PORT) \
 	  obj/plugin_lib
+
 
 all: maketree $(TARGET)
 
@@ -80,7 +90,9 @@ OBJS = \
 ifdef RECOMPILER
 OBJS += \
 	obj/recompiler/mips/recompiler.o \
-	obj/recompiler/mips/mips_disasm.o
+	obj/recompiler/mips/mips_disasm.o \
+	obj/recompiler/mips/mem_mapping.o \
+	obj/recompiler/mips/mips_codegen.o
 endif
 
 ######################################################################
@@ -99,10 +111,12 @@ endif
 ######################################################################
 
 OBJS += obj/gte.o
+# OBJS += obj/cheat.o
 OBJS += obj/spu/$(SPU)/spu.o
 
 OBJS += obj/port/$(PORT)/port.o
 OBJS += obj/port/$(PORT)/frontend.o
+# OBJS += obj/port/$(PORT)/cdrom_hacks.o
 
 OBJS += obj/plugin_lib/perfmon.o
 
@@ -115,24 +129,14 @@ OBJS += obj/plugin_lib/perfmon.o
 #  to avoid audio dropouts. 0: once-per-frame (default)   5: 32-times-per-frame
 #
 #  On slower Dingoo A320, update 8 times per frame
-ifdef A320
 CFLAGS += -DSPU_UPDATE_FREQ_DEFAULT=3
-else
-#  On faster GCW Zero platform, update 4 times per frame
-CFLAGS += -DSPU_UPDATE_FREQ_DEFAULT=2
-endif
 ##########
 
 ##########
 # Similarly, set higher XA audio update frequency for slower devices
 #
 #  On slower Dingoo A320, force XA to update 8 times per frame (val 4)
-ifdef A320
 CFLAGS += -DFORCED_XA_UPDATES_DEFAULT=4
-else
-#  On faster GCW Zero platform, use auto-update
-CFLAGS += -DFORCED_XA_UPDATES_DEFAULT=1
-endif
 ##########
 
 ifeq ($(SPU),spu_pcsxrearmed)
@@ -196,22 +200,28 @@ $(TARGET): $(OBJS)
 
 obj/%.o: src/%.c
 	@echo Compiling $<...
-	$(HIDECMD)$(CC) $(CFLAGS) -c $< -o $@
+	$(HIDECMD)$(CC) -std=gnu99 $(CFLAGS) -c $< -o $@
 
 obj/%.o: src/%.cpp
 	@echo Compiling $<...
-	$(HIDECMD)$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(HIDECMD)$(CXX) -std=gnu++03 $(CXXFLAGS) -c $< -o $@
 
 obj/%.o: src/%.s
 	@echo Compiling $<...
-	$(HIDECMD)$(CXX) $(CFLAGS) -c $< -o $@
+	$(HIDECMD)$(CXX) -std=gnu99 $(CFLAGS) -c $< -o $@
 
 obj/%.o: src/%.S
 	@echo Compiling $<...
-	$(HIDECMD)$(CXX) $(CFLAGS) -c $< -o $@
+	$(HIDECMD)$(CXX) -std=gnu99 $(CFLAGS) -c $< -o $@
 
 $(sort $(OBJDIRS)):
 	$(HIDECMD)$(MD) $@
+
+maketree: $(sort $(OBJDIRS))
+
+clean:
+	$(RM) -r obj
+	$(RM) $(TARGET)
 
 ipk: all
 	@rm -rf /tmp/.pcsx4all-ipk/ && mkdir -p /tmp/.pcsx4all-ipk/root/home/retrofw/emus/pcsx4all /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators.systems
@@ -225,8 +235,12 @@ ipk: all
 	@echo 2.0 > /tmp/.pcsx4all-ipk/debian-binary
 	@ar r pcsx4all/pcsx4all.ipk /tmp/.pcsx4all-ipk/control.tar.gz /tmp/.pcsx4all-ipk/data.tar.gz /tmp/.pcsx4all-ipk/debian-binary
 
-maketree: $(sort $(OBJDIRS))
-
-clean:
-	$(RM) -r obj
-	$(RM) $(TARGET)
+opk: all
+	@mksquashfs \
+	pcsx4all/default.retrofw.desktop \
+	pcsx4all/ps1.retrofw.desktop \
+	pcsx4all/pcsx4all.dge \
+	pcsx4all/pcsx4all.png \
+	pcsx4all/backdrop.png \
+	pcsx4all/pcsx4all.opk \
+	-all-root -noappend -no-exports -no-xattrs
