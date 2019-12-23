@@ -454,7 +454,7 @@ static int gui_Credits()
 
 		y += 14; port_printf(x, y, "zear: gui fixing and testing");
 		y += 14; port_printf(x, y, "Steward-Fu: Initial RetroGame port");
-		y += 14; port_printf(x, y, "pingflood: RetroGame GUI changes");
+		y += 14; port_printf(x, y, "pingflood: RetroFW port");
 
 		video_flip();
 		timer_delay(75);
@@ -1168,7 +1168,7 @@ static char *SlowBoot_show()
 
 static void SlowBoot_hint()
 {
-	port_printf(7 * 8, 10 * 8, "Skip BIOS logos at startup");
+	port_printf(7 * 8, 200, "Skip BIOS logos at startup");
 }
 
 static int SlowBoot_alter(u32 keys)
