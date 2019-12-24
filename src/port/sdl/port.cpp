@@ -85,6 +85,8 @@ char sstatesdir[PATH_MAX] = "./.pcsx4all/sstates";
 
 static char McdPath1[PATH_MAX] = "";
 static char McdPath2[PATH_MAX] = "";
+static char BiosFile[PATH_MAX] = "";
+
 #ifdef __WIN32__
 	#define MKDIR(A) mkdir(A)
 #else
@@ -639,6 +641,33 @@ void update_memcards(int load_mcd) {
 		LoadMcd(MCD2, McdPath2); //Memcard 2
 	}
 }
+
+const char *bios_file_get() {
+	if (BiosFile[0])
+		return BiosFile;
+	else
+		return "HLE";
+}
+
+void bios_file_set(const char *filename) {
+	strcpy(Config.Bios, filename);
+	strcpy(BiosFile, filename);
+}
+
+// if [CdromId].bin is exsit, use the spec bios
+void check_spec_bios() {
+	FILE *f = NULL;
+	char bios[MAXPATHLEN];
+	sprintf(bios, "%s/%s.bin", Config.BiosDir, CdromId);
+	f = fopen(bios, "rb");
+	if (f == NULL) {
+		strcpy(BiosFile, Config.Bios);
+		return;
+	}
+	fclose(f);
+	sprintf(BiosFile, "%s.bin", CdromId);
+}
+
 /* This is needed to override redirecting to stderr.txt and stdout.txt
 with mingw build. */
 #ifdef UNDEF_MAIN
@@ -661,7 +690,7 @@ int main (int argc, char **argv)
 
 	strcpy(Config.PatchesDir, patchesdir);
 	strcpy(Config.BiosDir, biosdir);
-	strcpy(Config.Bios, "scph1001.bin");
+	strcpy(Config.Bios, "");
 
 	Config.Xa=0; /* 0=XA enabled, 1=XA disabled */
 	Config.Mdec=0; /* 0=Black&White Mdecs Only Disabled, 1=Black&White Mdecs Only Enabled */
@@ -1082,6 +1111,8 @@ int main (int argc, char **argv)
 	}
 
 	update_memcards(0);
+	strcpy(BiosFile, Config.Bios);
+
 	if (param_parse_error) {
 		printf("Failed to parse command-line parameters, exiting.\n");
 		exit(1);
@@ -1143,6 +1174,8 @@ int main (int argc, char **argv)
 			printf("Failed checking ISO image.\n");
 			SetIsoFile(NULL);
 		} else {
+			check_spec_bios();
+			psxReset();
 			printf("Running ISO image: %s.\n", cdrfilename);
 			if (LoadCdrom() == -1) {
 				printf("Failed loading ISO image.\n");

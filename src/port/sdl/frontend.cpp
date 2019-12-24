@@ -1121,19 +1121,18 @@ static char *cycle_show()
 
 static int bios_alter(u32 keys)
 {
-	if (keys & KEY_RIGHT) {
-		if (Config.HLE == 0) Config.HLE = 1;
-	} else if (keys & KEY_LEFT) {
-		if (Config.HLE == 1) Config.HLE = 0;
-	}
+	if (keys & KEY_RIGHT)
+		Config.HLE = 0;
+	else if (keys & KEY_LEFT)
+		Config.HLE = 1;
 
 	return 0;
 }
 
 static char *bios_show()
 {
-	static char buf[16] = "\0";
-	sprintf(buf, "%s", Config.HLE ? "on" : "off");
+	static char buf[17] = "\0";
+	snprintf(buf, 16, "%s", Config.HLE ? "HLE" : bios_file_get());
 	return buf;
 }
 
@@ -1144,10 +1143,16 @@ static int bios_set()
 
 	if (name) {
 		const char *p = strrchr(name, '/');
-		strcpy(Config.Bios, p + 1);
+		bios_file_set(p + 1);
+		Config.HLE = 0;
+		psxReset();
 	}
-
 	return 0;
+}
+
+static char *bios_file_show()
+{
+	return (char*)bios_file_get();
 }
 
 static int RCntFix_alter(u32 keys)
@@ -1306,6 +1311,7 @@ static MENUITEM gui_SettingsItems[] = {
 	{(char *)"Restore defaults     ", &settings_defaults, NULL, NULL, NULL},
 	// {NULL, NULL, NULL, NULL, NULL},
 	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
+	{(char *)"PSX BIOS         ", &bios_set, &bios_alter, &bios_show, &psx_bios_hint},
 	{(char *)"Memory Card 1    ", NULL, &McdSlot1_alter, &McdSlot1_show, NULL},
 	{(char *)"Memory Card 2    ", NULL, &McdSlot2_alter, &McdSlot2_show, NULL},
 	{0}
@@ -1854,6 +1860,10 @@ static void ShowMenu(MENU *menu)
 
 	// general copyrights info
 	port_printf( (320 - 12 * 8) / 2, 10, "pcsx4all 2.4");
+
+	port_printf(2 * 8, 220, "BIOS:");
+	port_printf(8 * 7.5, 220, bios_file_get());
+
 	// port_printf( 4 * 8, 220, "Built on " __DATE__ " at " __TIME__);
 }
 
