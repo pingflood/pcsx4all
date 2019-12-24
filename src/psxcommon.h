@@ -137,6 +137,8 @@ typedef struct {
 	boolean VSyncWA; /* 1=InuYasha Sengoku Battle Fix */
 	u8 Cpu; /* 0=recompiler, 1=interpreter */
 	u8 PsxType; /* 0=ntsc, 1=pal */
+	u8 McdSlot1; /* mcd slot 1, mcd%03u.mcr */
+	u8 McdSlot2; /* mcd slot 2, mcd%03u.mcr */
 
 	//senquack - added Config.SpuIrq option from PCSX Rearmed/Reloaded:
 	boolean SpuIrq; /* 1=SPU IRQ always enabled (needed for audio in some games) */

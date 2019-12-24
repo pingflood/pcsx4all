@@ -30,14 +30,17 @@
 #include "spu/spu_pcsxrearmed/spu_config.h"
 #endif
 
+extern const char *GetMemcardPath(int slot);
+
+
 int LoadPlugins(void) {
 	int ret;
 	const char *cdrfilename=NULL;
 
 	ReleasePlugins();
 
-	LoadMcd(MCD1, Config.Mcd1); //Memcard 1
-	LoadMcd(MCD2, Config.Mcd2); //Memcard 2
+	LoadMcd(MCD1, (char*)GetMemcardPath(1)); //Memcard 1
+	LoadMcd(MCD2, (char*)GetMemcardPath(2)); //Memcard 2
 
 	ret = CDR_init();
 	if (ret < 0) { printf ("Error initializing CD-ROM plugin: %d\n", ret); return -1; }

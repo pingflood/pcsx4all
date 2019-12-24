@@ -83,6 +83,8 @@ static char biosdir[PATH_MAX] =		"./.pcsx4all/bios";
 static char patchesdir[PATH_MAX] =	"./.pcsx4all/patches";
 char sstatesdir[PATH_MAX] = "./.pcsx4all/sstates";
 
+static char McdPath1[PATH_MAX] = "";
+static char McdPath2[PATH_MAX] = "";
 #ifdef __WIN32__
 	#define MKDIR(A) mkdir(A)
 #else
@@ -214,6 +216,12 @@ void config_load()
 		} else if (!strcmp(line, "PsxType")) {
 			sscanf(arg, "%d", &value);
 			Config.PsxType = value;
+		} else if (!strcmp(line, "McdSlot1")) {
+            sscanf(arg, "%d", &value);
+            Config.McdSlot1 = value;
+        } else if (!strcmp(line, "McdSlot2")) {
+            sscanf(arg, "%d", &value);
+            Config.McdSlot2 = value;
 		} else if (!strcmp(line, "SpuIrq")) {
 			sscanf(arg, "%d", &value);
 			Config.SpuIrq = value;
@@ -355,6 +363,8 @@ void config_save()
 		   "VSyncWA %d\n"
 		   "Cpu %d\n"
 		   "PsxType %d\n"
+		   "McdSlot1 %d\n"
+		   "McdSlot2 %d\n"
 		   "SpuIrq %d\n"
 		   "SyncAudio %d\n"
 		   "SpuUpdateFreq %d\n"
@@ -364,7 +374,7 @@ void config_save()
 		   "FrameSkip %d\n",
 		   CONFIG_VERSION, Config.Xa, Config.Mdec, Config.PsxAuto,
 		   Config.Cdda, Config.HLE, Config.SlowBoot, Config.RCntFix, Config.VSyncWA,
-		   Config.Cpu, Config.PsxType, Config.SpuIrq, Config.SyncAudio,
+		   Config.Cpu, Config.PsxType, Config.McdSlot1, Config.McdSlot2, Config.SpuIrq, Config.SyncAudio,
 		   Config.SpuUpdateFreq, Config.ForcedXAUpdates, Config.ShowFps, Config.FrameLimit,
 		   Config.FrameSkip);
 
@@ -607,6 +617,28 @@ void video_clear(void)
 	memset(screen->pixels, 0, screen->pitch*screen->h);
 }
 
+const char *GetMemcardPath(int slot) {
+	switch(slot) {
+	case 1:
+		return McdPath1;
+	case 2:
+		return McdPath2;
+	}
+	return NULL;
+}
+
+void update_memcards(int load_mcd) {
+	sprintf(McdPath1, "%s/mcd%03d.mcr", memcardsdir, (int) Config.McdSlot1);
+	sprintf(McdPath2, "%s/mcd%03d.mcr", memcardsdir, (int) Config.McdSlot2);
+	if (load_mcd & 1) {
+		printf("Loading memcard: %s\n", McdPath1);
+		LoadMcd(MCD1, McdPath1); //Memcard 1
+	}
+	if (load_mcd & 2) {
+		printf("Loading memcard: %s\n", McdPath2);
+		LoadMcd(MCD2, McdPath2); //Memcard 2
+	}
+}
 /* This is needed to override redirecting to stderr.txt and stdout.txt
 with mingw build. */
 #ifdef UNDEF_MAIN
@@ -623,8 +655,10 @@ int main (int argc, char **argv)
 	setup_paths();
 
 	// PCSX
-	sprintf(Config.Mcd1, "%s/%s", memcardsdir, "mcd001.mcr");
-	sprintf(Config.Mcd2, "%s/%s", memcardsdir, "mcd002.mcr");
+	Config.McdSlot1 = 1;
+	Config.McdSlot2 = 2;
+	update_memcards(0);
+
 	strcpy(Config.PatchesDir, patchesdir);
 	strcpy(Config.BiosDir, biosdir);
 	strcpy(Config.Bios, "scph1001.bin");
@@ -1047,6 +1081,7 @@ int main (int argc, char **argv)
 	#endif //!SPU_NULL
 	}
 
+	update_memcards(0);
 	if (param_parse_error) {
 		printf("Failed to parse command-line parameters, exiting.\n");
 		exit(1);

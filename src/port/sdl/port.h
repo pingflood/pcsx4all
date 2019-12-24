@@ -41,6 +41,7 @@ extern unsigned short *SCREEN;
 int state_load(int slot);
 int state_save(int slot);
 
+void update_memcards(int load_mcd);
 int SelectGame();
 int GameMenu();
 

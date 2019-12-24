@@ -1222,6 +1222,54 @@ static int settings_back()
 	return 1;
 }
 
+static int McdSlot1_alter(u32 keys)
+{
+	int slot = Config.McdSlot1;
+	if (keys & KEY_RIGHT)
+	{
+		if (++slot > 15) slot = 1;
+	}
+	else
+	if (keys & KEY_LEFT)
+	{
+		if (--slot < 1) slot = 15;
+	}
+	Config.McdSlot1 = slot;
+	update_memcards(1);
+	return 0;
+}
+
+static char *McdSlot1_show()
+{
+	static char buf[16] = "\0";
+	sprintf(buf, "mcd%03d.mcr", (int)Config.McdSlot1);
+	return buf;
+}
+
+static int McdSlot2_alter(u32 keys)
+{
+	int slot = Config.McdSlot2;
+	if (keys & KEY_RIGHT)
+	{
+		if (++slot > 16) slot = 1;
+	}
+	else
+	if (keys & KEY_LEFT)
+	{
+		if (--slot < 1) slot = 16;
+	}
+	Config.McdSlot2 = slot;
+	update_memcards(2);
+	return 0;
+}
+
+static char *McdSlot2_show()
+{
+	static char buf[16] = "\0";
+	sprintf(buf, "mcd%03d.mcr", (int)Config.McdSlot2);
+	return buf;
+}
+
 static int settings_defaults()
 {
 	/* Restores settings to default values. */
@@ -1256,6 +1304,8 @@ static MENUITEM gui_SettingsItems[] = {
 	{(char *)"Restore defaults     ", &settings_defaults, NULL, NULL, NULL},
 	// {NULL, NULL, NULL, NULL, NULL},
 	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
+	{(char *)"Memory Card 1    ", NULL, &McdSlot1_alter, &McdSlot1_show, NULL},
+	{(char *)"Memory Card 2    ", NULL, &McdSlot2_alter, &McdSlot2_show, NULL},
 	{0}
 };
 
