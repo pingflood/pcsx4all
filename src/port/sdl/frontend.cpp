@@ -57,8 +57,7 @@ static unsigned int key_read(void)
 {
 	SDL_Event event;
 
-	while (SDL_PollEvent(&event))  {
-	// SDL_WaitEvent(&event);  {
+	if (SDL_WaitEvent(&event)) {
 		switch (event.type) {
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
@@ -413,6 +412,7 @@ static int gui_Settings();
 static int gui_GPUSettings();
 static int gui_SPUSettings();
 static int gui_Quit();
+static int psx_Reset();
 
 static int gui_Credits()
 {
@@ -455,7 +455,7 @@ static int gui_Credits()
 
 		y += 14; port_printf(x, y, "zear: gui fixing and testing");
 		y += 14; port_printf(x, y, "Steward-Fu: Initial RetroGame port");
-		y += 14; port_printf(x, y, "pingflood: RetroGame GUI changes");
+		y += 14; port_printf(x, y, "pingflood: RetroFW port");
 
 		video_flip();
 		timer_delay(75);
@@ -676,10 +676,6 @@ static int gui_StateSave()
 		{(char *)str_slot[7], &gui_state_save7, NULL, NULL, &gui_state_save_hint7},
 		{(char *)str_slot[8], &gui_state_save8, NULL, NULL, &gui_state_save_hint8},
 		{(char *)str_slot[9], &gui_state_save9, NULL, NULL, &gui_state_save_hint9},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {(char *)"Back to main menu    ", &gui_state_save_back, NULL, NULL, NULL},
 		{0}
 	};
 
@@ -894,10 +890,6 @@ static int gui_StateLoad()
 		{(char *)str_slot[7], &gui_state_load7, NULL, NULL, &gui_state_load_hint7},
 		{(char *)str_slot[8], &gui_state_load8, NULL, NULL, &gui_state_load_hint8},
 		{(char *)str_slot[9], &gui_state_load9, NULL, NULL, &gui_state_load_hint9},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {(char *)"Back to main menu    ", &gui_state_load_back, NULL, NULL, NULL},
 		{0}
 	};
 
@@ -1071,6 +1063,7 @@ static MENUITEM gui_GameMenuItems[] = {
 	{(char *)"Save state", &gui_StateSave, NULL, NULL, NULL},
 	{(char *)"Swap CD", &gui_swap_cd, NULL, NULL, NULL},
 	{(char *)"Settings", &SelectGame, NULL, NULL, NULL},
+	{(char *)"Reset", &psx_Reset, NULL, NULL, NULL},
 	{(char *)"Quit", &gui_Quit, NULL, NULL, NULL},
 	{0}
 };
@@ -1120,19 +1113,18 @@ static char *cycle_show()
 
 static int bios_alter(u32 keys)
 {
-	if (keys & KEY_RIGHT) {
-		if (Config.HLE == 0) Config.HLE = 1;
-	} else if (keys & KEY_LEFT) {
-		if (Config.HLE == 1) Config.HLE = 0;
-	}
+	if (keys & KEY_RIGHT)
+		Config.HLE = 0;
+	else if (keys & KEY_LEFT)
+		Config.HLE = 1;
 
 	return 0;
 }
 
 static char *bios_show()
 {
-	static char buf[16] = "\0";
-	sprintf(buf, "%s", Config.HLE ? "on" : "off");
+	static char buf[17] = "\0";
+	snprintf(buf, 16, "%s", Config.HLE ? "HLE" : bios_file_get());
 	return buf;
 }
 
@@ -1143,10 +1135,16 @@ static int bios_set()
 
 	if (name) {
 		const char *p = strrchr(name, '/');
-		strcpy(Config.Bios, p + 1);
+		bios_file_set(p + 1);
+		Config.HLE = 0;
+		psxReset();
 	}
-
 	return 0;
+}
+
+static char *bios_file_show()
+{
+	return (char*)bios_file_get();
 }
 
 static int RCntFix_alter(u32 keys)
@@ -1160,16 +1158,29 @@ static int RCntFix_alter(u32 keys)
 	return 0;
 }
 
+static char *SlowBoot_show()
+{
+	static char buf[16] = "\0";
+	sprintf(buf, "%s", Config.SlowBoot ? "off" : "on");
+	return buf;
+}
+
+static int SlowBoot_alter(u32 keys)
+{
+	if (keys & KEY_RIGHT) {
+		if (Config.SlowBoot < 1) Config.SlowBoot = 1;
+	} else if (keys & KEY_LEFT) {
+		if (Config.SlowBoot > 0) Config.SlowBoot = 0;
+	}
+
+	return 0;
+}
+
 static char *RCntFix_show()
 {
 	static char buf[16] = "\0";
 	sprintf(buf, "%s", Config.RCntFix ? "on" : "off");
 	return buf;
-}
-
-static void RCntFix_hint()
-{
-	port_printf(2 * 8 - 4, 200, "Parasite Eve 2, Vandal Hearts 1/2 Fix");
 }
 
 static int VSyncWA_alter(u32 keys)
@@ -1183,9 +1194,24 @@ static int VSyncWA_alter(u32 keys)
 	return 0;
 }
 
+static void SlowBoot_hint()
+{
+	port_printf(7 * 8, 150, "Skip BIOS logos at startup");
+}
+
+static void RCntFix_hint()
+{
+	port_printf(2 * 8 - 4, 150, "Parasite Eve 2, Vandal Hearts 1/2 Fix");
+}
+
+static void psx_bios_hint()
+{
+	port_printf(6 * 8 - 4, 150, "Press A to select a BIOS file");
+}
+
 static void VSyncWA_hint()
 {
-	port_printf(6 * 8, 200, "InuYasha Sengoku Battle Fix");
+	port_printf(6 * 8, 150, "InuYasha Sengoku Battle Fix");
 }
 
 static char *VSyncWA_show()
@@ -1200,12 +1226,61 @@ static int settings_back()
 	return 1;
 }
 
+static int McdSlot1_alter(u32 keys)
+{
+	int slot = Config.McdSlot1;
+	if (keys & KEY_RIGHT)
+	{
+		if (++slot > 15) slot = 1;
+	}
+	else
+	if (keys & KEY_LEFT)
+	{
+		if (--slot < 1) slot = 15;
+	}
+	Config.McdSlot1 = slot;
+	update_memcards(1);
+	return 0;
+}
+
+static char *McdSlot1_show()
+{
+	static char buf[16] = "\0";
+	sprintf(buf, "mcd%03d.mcr", (int)Config.McdSlot1);
+	return buf;
+}
+
+static int McdSlot2_alter(u32 keys)
+{
+	int slot = Config.McdSlot2;
+	if (keys & KEY_RIGHT)
+	{
+		if (++slot > 16) slot = 1;
+	}
+	else
+	if (keys & KEY_LEFT)
+	{
+		if (--slot < 1) slot = 16;
+	}
+	Config.McdSlot2 = slot;
+	update_memcards(2);
+	return 0;
+}
+
+static char *McdSlot2_show()
+{
+	static char buf[16] = "\0";
+	sprintf(buf, "mcd%03d.mcr", (int)Config.McdSlot2);
+	return buf;
+}
+
 static int settings_defaults()
 {
 	/* Restores settings to default values. */
 	Config.Mdec = 0;
 	Config.PsxAuto = 1;
 	Config.HLE = 1;
+	Config.SlowBoot = 0;
 	Config.RCntFix = 0;
 	Config.VSyncWA = 0;
 #ifdef PSXREC
@@ -1222,16 +1297,17 @@ static int settings_defaults()
 
 static MENUITEM gui_SettingsItems[] = {
 #ifdef PSXREC
-	{(char *)"Emulation core       ", NULL, &emu_alter, &emu_show, NULL},
-	{(char *)"Cycle multiplier     ", NULL, &cycle_alter, &cycle_show, NULL},
+	{(char *)"Emulation core   ", NULL, &emu_alter, &emu_show, NULL},
+	{(char *)"Cycle multiplier ", NULL, &cycle_alter, &cycle_show, NULL},
 #endif
-	{(char *)"HLE emulated BIOS    ", NULL, &bios_alter, &bios_show, NULL},
-	{(char *)"Set BIOS file        ", &bios_set, NULL, NULL, NULL},
-	{(char *)"RCntFix              ", NULL, &RCntFix_alter, &RCntFix_show, &RCntFix_hint},
-	{(char *)"VSyncWA              ", NULL, &VSyncWA_alter, &VSyncWA_show, &VSyncWA_hint},
-	{(char *)"Restore defaults     ", &settings_defaults, NULL, NULL, NULL},
-	// {NULL, NULL, NULL, NULL, NULL},
-	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
+	{(char *)"PSX BIOS         ", &bios_set, &bios_alter, &bios_show, &psx_bios_hint},
+	{(char *)"Skip BIOS logos  ", NULL, &SlowBoot_alter, &SlowBoot_show, &SlowBoot_hint},
+	{(char *)"RCntFix          ", NULL, &RCntFix_alter, &RCntFix_show, &RCntFix_hint},
+	{(char *)"VSyncWA          ", NULL, &VSyncWA_alter, &VSyncWA_show, &VSyncWA_hint},
+	{(char *)"Memory Card 1    ", NULL, &McdSlot1_alter, &McdSlot1_show, NULL},
+	{(char *)"Memory Card 2    ", NULL, &McdSlot2_alter, &McdSlot2_show, NULL},
+
+	{(char *)"Restore defaults   ", &settings_defaults, NULL, NULL, NULL},
 	{0}
 };
 
@@ -1474,8 +1550,6 @@ static MENUITEM gui_GPUSettingsItems[] = {
 	{(char *)"Pixel skip           ", NULL, &pixel_skip_alter, &pixel_skip_show, NULL},
 #endif
 	{(char *)"Restore defaults     ", &gpu_settings_defaults, NULL, NULL, NULL},
-	// {NULL, NULL, NULL, NULL, NULL},
-	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
 	{0}
 };
 
@@ -1689,8 +1763,6 @@ static MENUITEM gui_SPUSettingsItems[] = {
 	{(char *)"Master volume        ", NULL, &volume_alter, &volume_show, NULL},
 #endif
 	{(char *)"Restore defaults     ", &spu_settings_defaults, NULL, NULL, NULL},
-	// {NULL, NULL, NULL, NULL, NULL},
-	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
 	{0}
 };
 
@@ -1742,6 +1814,12 @@ static int gui_Quit()
 	return 0;
 }
 
+static int psx_Reset()
+{
+	psxReset();
+	return 1;
+}
+
 static void ShowMenuItem(int x, int y, MENUITEM *mi)
 {
 	static char string[PATH_MAX];
@@ -1772,6 +1850,15 @@ static void ShowMenu(MENU *menu)
 
 	// general copyrights info
 	port_printf( (320 - 12 * 8) / 2, 10, "pcsx4all 2.4");
+	if (CdromId[0]) {
+		// add disc id display for confirming cheat filename
+		port_printf(2 * 8, 210, "CDID:");
+		port_printf(8 * 7.5, 210, CdromId);
+	}
+
+	port_printf(2 * 8, 220, "BIOS:");
+	port_printf(8 * 7.5, 220, bios_file_get());
+
 	// port_printf( 4 * 8, 220, "Built on " __DATE__ " at " __TIME__);
 }
 

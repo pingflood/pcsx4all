@@ -13,3 +13,5 @@ stdout.txt
 *.sh
 *.bat
 err.txt
+*.opk
+*.elf

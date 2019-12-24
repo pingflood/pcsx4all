@@ -1,6 +1,13 @@
 TARGET = pcsx4all/pcsx4all.dge
 PORT   = sdl
 
+# If V=1 was passed to 'make', don't hide commands:
+ifeq ($(V),1)
+	HIDECMD:=
+else
+	HIDECMD:=@
+endif
+
 # Using 'gpulib' adapted from PCSX Rearmed is default, specify
 #  USE_GPULIB=0 as param to 'make' when building to disable it.
 USE_GPULIB ?= 1
@@ -36,8 +43,6 @@ CFLAGS = -ggdb3 -O0 -march=native -DGCW_ZERO \
 # Convert plugin names to uppercase and make them CFLAG defines
 CFLAGS += -D$(shell echo $(GPU) | tr a-z A-Z)
 CFLAGS += -D$(shell echo $(SPU) | tr a-z A-Z)
-
-LDFLAGS = $(SDL_LIBS) -lSDL_mixer -lSDL_image -lpthread -lz
 
 OBJDIRS = \
 	obj obj/gpu obj/gpu/$(GPU) obj/spu obj/spu/$(SPU) \
@@ -129,13 +134,6 @@ endif
 #******************************************
 
 CXXFLAGS := $(CFLAGS) -fno-rtti
-
-#If V=1 was passed to 'make', do not hide commands:
-ifdef V
-	HIDECMD:=
-else
-	HIDECMD:=@
-endif
 
 $(TARGET): $(OBJS)
 	@echo Linking $(TARGET)...
