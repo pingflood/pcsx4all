@@ -676,10 +676,6 @@ static int gui_StateSave()
 		{(char *)str_slot[7], &gui_state_save7, NULL, NULL, &gui_state_save_hint7},
 		{(char *)str_slot[8], &gui_state_save8, NULL, NULL, &gui_state_save_hint8},
 		{(char *)str_slot[9], &gui_state_save9, NULL, NULL, &gui_state_save_hint9},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {(char *)"Back to main menu    ", &gui_state_save_back, NULL, NULL, NULL},
 		{0}
 	};
 
@@ -894,10 +890,6 @@ static int gui_StateLoad()
 		{(char *)str_slot[7], &gui_state_load7, NULL, NULL, &gui_state_load_hint7},
 		{(char *)str_slot[8], &gui_state_load8, NULL, NULL, &gui_state_load_hint8},
 		{(char *)str_slot[9], &gui_state_load9, NULL, NULL, &gui_state_load_hint9},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {NULL, NULL, NULL, NULL, NULL},
-		// {(char *)"Back to main menu    ", &gui_state_load_back, NULL, NULL, NULL},
 		{0}
 	};
 
@@ -1173,11 +1165,6 @@ static char *SlowBoot_show()
 	return buf;
 }
 
-static void SlowBoot_hint()
-{
-	port_printf(7 * 8, 200, "Skip BIOS logos at startup");
-}
-
 static int SlowBoot_alter(u32 keys)
 {
 	if (keys & KEY_RIGHT) {
@@ -1196,11 +1183,6 @@ static char *RCntFix_show()
 	return buf;
 }
 
-static void RCntFix_hint()
-{
-	port_printf(2 * 8 - 4, 200, "Parasite Eve 2, Vandal Hearts 1/2 Fix");
-}
-
 static int VSyncWA_alter(u32 keys)
 {
 	if (keys & KEY_RIGHT) {
@@ -1212,9 +1194,24 @@ static int VSyncWA_alter(u32 keys)
 	return 0;
 }
 
+static void SlowBoot_hint()
+{
+	port_printf(7 * 8, 150, "Skip BIOS logos at startup");
+}
+
+static void RCntFix_hint()
+{
+	port_printf(2 * 8 - 4, 150, "Parasite Eve 2, Vandal Hearts 1/2 Fix");
+}
+
+static void psx_bios_hint()
+{
+	port_printf(6 * 8 - 4, 150, "Press A to select a BIOS file");
+}
+
 static void VSyncWA_hint()
 {
-	port_printf(6 * 8, 200, "InuYasha Sengoku Battle Fix");
+	port_printf(6 * 8, 150, "InuYasha Sengoku Battle Fix");
 }
 
 static char *VSyncWA_show()
@@ -1300,20 +1297,17 @@ static int settings_defaults()
 
 static MENUITEM gui_SettingsItems[] = {
 #ifdef PSXREC
-	{(char *)"Emulation core       ", NULL, &emu_alter, &emu_show, NULL},
-	{(char *)"Cycle multiplier     ", NULL, &cycle_alter, &cycle_show, NULL},
+	{(char *)"Emulation core   ", NULL, &emu_alter, &emu_show, NULL},
+	{(char *)"Cycle multiplier ", NULL, &cycle_alter, &cycle_show, NULL},
 #endif
-	{(char *)"HLE emulated BIOS    ", NULL, &bios_alter, &bios_show, NULL},
-	{(char *)"Set BIOS file        ", &bios_set, NULL, NULL, NULL},
-	{(char *)"Skip BIOS logos      ", NULL, &SlowBoot_alter, &SlowBoot_show, &SlowBoot_hint},
-	{(char *)"RCntFix              ", NULL, &RCntFix_alter, &RCntFix_show, &RCntFix_hint},
-	{(char *)"VSyncWA              ", NULL, &VSyncWA_alter, &VSyncWA_show, &VSyncWA_hint},
-	{(char *)"Restore defaults     ", &settings_defaults, NULL, NULL, NULL},
-	// {NULL, NULL, NULL, NULL, NULL},
-	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
 	{(char *)"PSX BIOS         ", &bios_set, &bios_alter, &bios_show, &psx_bios_hint},
+	{(char *)"Skip BIOS logos  ", NULL, &SlowBoot_alter, &SlowBoot_show, &SlowBoot_hint},
+	{(char *)"RCntFix          ", NULL, &RCntFix_alter, &RCntFix_show, &RCntFix_hint},
+	{(char *)"VSyncWA          ", NULL, &VSyncWA_alter, &VSyncWA_show, &VSyncWA_hint},
 	{(char *)"Memory Card 1    ", NULL, &McdSlot1_alter, &McdSlot1_show, NULL},
 	{(char *)"Memory Card 2    ", NULL, &McdSlot2_alter, &McdSlot2_show, NULL},
+
+	{(char *)"Restore defaults   ", &settings_defaults, NULL, NULL, NULL},
 	{0}
 };
 
@@ -1556,8 +1550,6 @@ static MENUITEM gui_GPUSettingsItems[] = {
 	{(char *)"Pixel skip           ", NULL, &pixel_skip_alter, &pixel_skip_show, NULL},
 #endif
 	{(char *)"Restore defaults     ", &gpu_settings_defaults, NULL, NULL, NULL},
-	// {NULL, NULL, NULL, NULL, NULL},
-	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
 	{0}
 };
 
@@ -1771,8 +1763,6 @@ static MENUITEM gui_SPUSettingsItems[] = {
 	{(char *)"Master volume        ", NULL, &volume_alter, &volume_show, NULL},
 #endif
 	{(char *)"Restore defaults     ", &spu_settings_defaults, NULL, NULL, NULL},
-	// {NULL, NULL, NULL, NULL, NULL},
-	// {(char *)"Back to main menu    ", &settings_back, NULL, NULL, NULL},
 	{0}
 };
 
@@ -1860,6 +1850,11 @@ static void ShowMenu(MENU *menu)
 
 	// general copyrights info
 	port_printf( (320 - 12 * 8) / 2, 10, "pcsx4all 2.4");
+	if (CdromId[0]) {
+		// add disc id display for confirming cheat filename
+		port_printf(2 * 8, 210, "CDID:");
+		port_printf(8 * 7.5, 210, CdromId);
+	}
 
 	port_printf(2 * 8, 220, "BIOS:");
 	port_printf(8 * 7.5, 220, bios_file_get());
