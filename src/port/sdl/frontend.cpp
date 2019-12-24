@@ -412,6 +412,7 @@ static int gui_Settings();
 static int gui_GPUSettings();
 static int gui_SPUSettings();
 static int gui_Quit();
+static int psx_Reset();
 
 static int gui_Credits()
 {
@@ -1070,6 +1071,7 @@ static MENUITEM gui_GameMenuItems[] = {
 	{(char *)"Save state", &gui_StateSave, NULL, NULL, NULL},
 	{(char *)"Swap CD", &gui_swap_cd, NULL, NULL, NULL},
 	{(char *)"Settings", &SelectGame, NULL, NULL, NULL},
+	{(char *)"Reset", &psx_Reset, NULL, NULL, NULL},
 	{(char *)"Quit", &gui_Quit, NULL, NULL, NULL},
 	{0}
 };
@@ -1814,6 +1816,12 @@ static int gui_Quit()
 {
 	exit(0);
 	return 0;
+}
+
+static int psx_Reset()
+{
+	psxReset();
+	return 1;
 }
 
 static void ShowMenuItem(int x, int y, MENUITEM *mi)
