@@ -175,7 +175,8 @@ void pl_reset(void)
 	pl_data.dynarec_compiled = false;
 	pl_data.dynarec_active_vsyncs = 0;
 	pl_frameskip_prepare();
-	sprintf(pl_data.stats_msg, "000x000x00 CPU=000%% FPS=000/00");
+	sprintf(pl_data.stats_msg, "");
+	// sprintf(pl_data.stats_msg, "000x000x00 CPU=000%% FPS=000/00");
 	pmonReset(); // Reset performance monitor (FPS,CPU usage,etc)
 }
 
@@ -196,8 +197,7 @@ void pl_resume(void)
 static void pl_stats_update(void)
 {
 	// TODO: show skipped frames in stats message
-
-	sprintf(pl_data.stats_msg, "%3ux%3ux%s CPU=%3u%% FPS=%3u/%u",
+	sprintf(pl_data.stats_msg, "%ux%ux%s CPU=%u%% FPS=%u/%u",
 			pl_data.sinfo.hres,
 			pl_data.sinfo.vres,
 			pl_data.sinfo.depth24 ? "24" : "15",
