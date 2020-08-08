@@ -197,7 +197,7 @@ static inline bool IsFuzzyScratchpadAddr(const u32 reg)  { return iRegs[reg].is_
  *  Dynamic allocation would get an anonymous mmap'ing, locating the recompiled
  *  code *far* too high in virtual address space.
  */
-#define RECMEM_SIZE         (12 * 1024 * 1024)
+#define RECMEM_SIZE         0x400000 //(12 * 1024 * 1024)
 #define RECMEM_SIZE_MAX     (RECMEM_SIZE-(512*1024))
 static u8 recMemBase[RECMEM_SIZE] __attribute__((aligned(4)));
 
