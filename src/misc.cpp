@@ -389,7 +389,9 @@ int CheckCdrom() {
 	if (CdromId[0] == '\0') {
 		len = strlen(exename);
 		c = 0;
-		for (i = 0; i < len; ++i) {
+		char *p = strchr(exename, '\\');
+		i = (p != NULL) ? p - exename : 0;
+		for (; i < len; ++i) {
 			if (exename[i] == ';' || c >= sizeof(CdromId) - 1)
 				break;
 			if (isalnum(exename[i]))
