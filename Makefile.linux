@@ -30,6 +30,10 @@ SDL_CONFIG  := $(SYSROOT)/usr/bin/sdl-config
 SDL_CFLAGS  := $(shell $(SDL_CONFIG) --cflags)
 SDL_LIBS    := $(shell $(SDL_CONFIG) --libs)
 
+# LDFLAGS = -nodefaultlibs -lc -lgcc -lSDL -lz -Wl,--as-needed -Wl,--gc-sections -s
+LDFLAGS = -lSDL -lz
+LDFLAGS += $(SDL_LIBS) -lSDL_mixer -lSDL_image -lrt
+
 CFLAGS = -ggdb3 -O0 -march=native -DGCW_ZERO \
 	-Wall -Wunused -Wpointer-arith \
 	-Wno-sign-compare -Wno-cast-align \
