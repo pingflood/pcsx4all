@@ -14,7 +14,7 @@ USE_GPULIB ?= 1
 GPU  = gpu_unai
 SPU  = spu_pcsxrearmed
 
-CHAINPREFIX := /opt/mipsel-linux-uclibc
+CHAINPREFIX := /opt/mipsel-RetroFW-linux-uclibc
 CROSS_COMPILE := $(CHAINPREFIX)/usr/bin/mipsel-linux-
 
 CC = $(CROSS_COMPILE)gcc
@@ -59,7 +59,7 @@ ifdef RECOMPILER
 CFLAGS += -DPSXREC -D$(RECOMPILER)
 endif
 
-CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti -nostdinc++ 
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti -nostdinc++
 
 LDFLAGS = -nodefaultlibs -lc -lgcc -lSDL -lz -Wl,--as-needed -Wl,--gc-sections -flto -s
 LDFLAGS += $(SDL_LIBS) -lSDL_mixer -lSDL_image -lrt
@@ -68,12 +68,6 @@ OBJDIRS = obj obj/gpu obj/gpu/$(GPU) obj/spu obj/spu/$(SPU) \
 	  obj/recompiler obj/recompiler/$(RECOMPILER) \
 	  obj/port obj/port/$(PORT) \
 	  obj/plugin_lib obj/port/common
-
-OBJDIRS = obj obj/gpu obj/gpu/$(GPU) obj/spu obj/spu/$(SPU) \
-	  obj/recompiler obj/recompiler/$(RECOMPILER) \
-	  obj/port obj/port/$(PORT) \
-	  obj/plugin_lib
-
 
 all: maketree $(TARGET)
 
@@ -221,7 +215,6 @@ maketree: $(sort $(OBJDIRS))
 
 clean:
 	$(RM) -r obj
-	$(RM) $(TARGET)
 
 ipk: all
 	@rm -rf /tmp/.pcsx4all-ipk/ && mkdir -p /tmp/.pcsx4all-ipk/root/home/retrofw/emus/pcsx4all /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators /tmp/.pcsx4all-ipk/root/home/retrofw/apps/gmenu2x/sections/emulators.systems
