@@ -518,14 +518,6 @@ void pad_update(void)
 
 	/* Special key combos for GCW-Zero */
 #ifdef GCW_ZERO
-	// SELECT+B for psx's SELECT
-	if (keys[SDLK_ESCAPE] && keys[SDLK_LALT]) {
-		pad1 &= ~(1 << DKEY_SELECT);
-		pad1 |= (1 << DKEY_CROSS);
-	} else {
-		pad1 |= (1 << DKEY_SELECT);
-	}
-
 	// SELECT+L1 for psx's L2
 	if (keys[SDLK_ESCAPE] && keys[SDLK_TAB]) {
 		pad1 &= ~(1 << DKEY_L2);
