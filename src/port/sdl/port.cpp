@@ -460,7 +460,7 @@ static struct {
 	{ SDLK_LALT,		DKEY_CROSS },
 	{ SDLK_TAB,		DKEY_L1 },
 	{ SDLK_BACKSPACE,	DKEY_R1 },
-	//{ SDLK_ESCAPE,		DKEY_SELECT },
+	{ SDLK_ESCAPE,		DKEY_SELECT },
 #else
 	{ SDLK_a,		DKEY_SQUARE },
 	{ SDLK_x,		DKEY_CIRCLE },
