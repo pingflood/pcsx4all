@@ -175,7 +175,7 @@ void pl_reset(void)
 	pl_data.dynarec_compiled = false;
 	pl_data.dynarec_active_vsyncs = 0;
 	pl_frameskip_prepare();
-	sprintf(pl_data.stats_msg, "");
+	strcpy(pl_data.stats_msg, "");
 	// sprintf(pl_data.stats_msg, "000x000x00 CPU=000%% FPS=000/00");
 	pmonReset(); // Reset performance monitor (FPS,CPU usage,etc)
 }
