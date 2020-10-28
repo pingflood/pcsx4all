@@ -461,6 +461,8 @@ static struct {
 	{ SDLK_TAB,		DKEY_L1 },
 	{ SDLK_BACKSPACE,	DKEY_R1 },
 	{ SDLK_ESCAPE,		DKEY_SELECT },
+	{ SDLK_PAGEUP,		DKEY_L2 },
+	{ SDLK_PAGEDOWN,	DKEY_R2 },
 #else
 	{ SDLK_a,		DKEY_SQUARE },
 	{ SDLK_x,		DKEY_CIRCLE },
@@ -522,6 +524,8 @@ void pad_update(void)
 	if (keys[SDLK_ESCAPE] && keys[SDLK_TAB]) {
 		pad1 &= ~(1 << DKEY_L2);
 		pad1 |= (1 << DKEY_L1);
+	} else if (keys[SDLK_PAGEUP]) {
+		pad1 &= ~(1 << DKEY_L2);
 	} else {
 		pad1 |= (1 << DKEY_L2);
 	}
@@ -530,6 +534,8 @@ void pad_update(void)
 	if (keys[SDLK_ESCAPE] && keys[SDLK_BACKSPACE]) {
 		pad1 &= ~(1 << DKEY_R2);
 		pad1 |= (1 << DKEY_R1);
+	} else if (keys[SDLK_PAGEDOWN]) {
+		pad1 &= ~(1 << DKEY_R2);
 	} else {
 		pad1 |= (1 << DKEY_R2);
 	}
