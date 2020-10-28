@@ -60,7 +60,7 @@ static inline u16 middle(u16 s1, u16 s2, u16 s3)
 	return a[1];
 }
 
-static inline u16 mask_filter(u16 *s)
+static inline u16 RGB16_AVG(u16 *s)
 {/*
 	u16 r0 = (s[0] & 0x7c00) >> 10;
 	u16 r1 = (s[1] & 0x7c00) >> 10;
@@ -76,6 +76,10 @@ static inline u16 mask_filter(u16 *s)
 	u16 b = (b0 + b1) / 2;
 
 	return (b<<11) | (g<<6) | r;*/
+
+	if (gpu_unai_config_ext.pixel_skip) {
+		return RGB16(s[0]);
+	}
 
 	u16 c1 = s[0];
 	u16 c2 = s[1];
@@ -165,15 +169,15 @@ static inline void GPU_Blit512(const void* src, u16* dst16, bool isRGB24)
 			dst16[ 9] = RGB16(src16[14]);
 		#else
 			dst16[ 0] = RGB16(src16[0]);
-			dst16[ 1] = mask_filter(&src16[1]);
+			dst16[ 1] = RGB16_AVG(&src16[1]);
 			dst16[ 2] = RGB16(src16[3]);
-			dst16[ 3] = mask_filter(&src16[4]);
-			dst16[ 4] = mask_filter(&src16[6]);
+			dst16[ 3] = RGB16_AVG(&src16[4]);
+			dst16[ 4] = RGB16_AVG(&src16[6]);
 			dst16[ 5] = RGB16(src16[8]);
-			dst16[ 6] = mask_filter(&src16[9]);
+			dst16[ 6] = RGB16_AVG(&src16[9]);
 			dst16[ 7] = RGB16(src16[11]);
-			dst16[ 8] = mask_filter(&src16[12]);
-			dst16[ 9] = mask_filter(&src16[14]);
+			dst16[ 8] = RGB16_AVG(&src16[12]);
+			dst16[ 9] = RGB16_AVG(&src16[14]);
 		#endif
 			dst16 += 10;
 			src16 += 16;
@@ -241,12 +245,12 @@ static inline void GPU_Blit384(const void* src, u16* dst16, bool isRGB24)
 			dst16[ 1] = RGB16(src16[1]);
 			dst16[ 2] = RGB16(src16[2]);
 			dst16[ 3] = RGB16(src16[3]);
-			dst16[ 4] = mask_filter(&src16[4]);
+			dst16[ 4] = RGB16_AVG(&src16[4]);
 			dst16[ 5] = RGB16(src16[6]);
 			dst16[ 6] = RGB16(src16[7]);
 			dst16[ 7] = RGB16(src16[8]);
 			dst16[ 8] = RGB16(src16[9]);
-			dst16[ 9] = mask_filter(&src16[10]);
+			dst16[ 9] = RGB16_AVG(&src16[10]);
 		#endif
 			dst16 += 10;
 			src16 += 12;
@@ -298,14 +302,14 @@ static inline void GPU_Blit368_clip(const void* src, u16* dst16)
 		dst16[ 3] = RGB16(src16[3]);
 		dst16[ 4] = RGB16(src16[4]);
 		dst16[ 5] = RGB16(src16[5]);
-		dst16[ 6] = mask_filter(&src16[6]);
+		dst16[ 6] = RGB16_AVG(&src16[6]);
 		dst16[ 7] = RGB16(src16[8]);
 		dst16[ 8] = RGB16(src16[9]);
 		dst16[ 9] = RGB16(src16[10]);
 		dst16[10] = RGB16(src16[11]);
 		dst16[11] = RGB16(src16[12]);
 		dst16[12] = RGB16(src16[13]);
-		dst16[13] = mask_filter(&src16[14]);
+		dst16[13] = RGB16_AVG(&src16[14]);
 		dst16 += 14;
 		src16 += 16;
 	} while (--uCount);   //6 + 22 * 14 = 314, 320 - 314 = 6
@@ -325,7 +329,7 @@ static inline void GPU_Blit368_clip(const void* src, u16* dst16)
 		dst16[ 6] = RGB16(src16[6]);
 		dst16[ 7] = RGB16(src16[7]);
 		dst16[ 8] = RGB16(src16[8]);
-		dst16[ 9] = mask_filter(&src16[9]);
+		dst16[ 9] = RGB16_AVG(&src16[9]);
 		dst16 += 10;
 		src16 += 11;
 	} while (--uCount);
@@ -369,7 +373,7 @@ static inline void GPU_Blit368(const void* src, u16* dst16, bool isRGB24/*, u32 
 				sx++;
 				if(++cnt == 7){
 					cnt = 0;
-					dst16[x] = mask_filter(&src16[sx]);
+					dst16[x] = RGB16_AVG(&src16[sx]);
 					sx++;
 				}
 				else{
@@ -388,14 +392,14 @@ static inline void GPU_Blit368(const void* src, u16* dst16, bool isRGB24/*, u32 
 			dst16[ 3] = RGB16(src16[3]);
 			dst16[ 4] = RGB16(src16[4]);
 			dst16[ 5] = RGB16(src16[5]);
-			dst16[ 6] = mask_filter(&src16[6]);
+			dst16[ 6] = RGB16_AVG(&src16[6]);
 			dst16[ 7] = RGB16(src16[8]);
 			dst16[ 8] = RGB16(src16[9]);
 			dst16[ 9] = RGB16(src16[10]);
 			dst16[10] = RGB16(src16[11]);
 			dst16[11] = RGB16(src16[12]);
 			dst16[12] = RGB16(src16[13]);
-			dst16[13] = mask_filter(&src16[14]);
+			dst16[13] = RGB16_AVG(&src16[14]);
 			dst16 += 14;
 			src16 += 16;
 		} while (--uCount);   //1 + 22 * 14 = 309, 320 - 309 = 11
@@ -406,7 +410,7 @@ static inline void GPU_Blit368(const void* src, u16* dst16, bool isRGB24/*, u32 
 			dst16[ 3] = RGB16(src16[3]);
 			dst16[ 4] = RGB16(src16[4]);
 			dst16[ 5] = RGB16(src16[5]);
-			dst16[ 6] = mask_filter(&src16[6]);
+			dst16[ 6] = RGB16_AVG(&src16[6]);
 			dst16[ 7] = RGB16(src16[8]);
 			dst16[ 8] = RGB16(src16[9]);
 			dst16[ 9] = RGB16(src16[10]);
@@ -545,25 +549,25 @@ static inline void GPU_Blit640(const void* src, u16* dst16, bool isRGB24)
 			dst16[14] = RGB16(src16[28]);
 			dst16[15] = RGB16(src16[30]);
 		#else
-			dst16[ 0] = mask_filter(&src16[0]);
-			dst16[ 1] = mask_filter(&src16[2]);
-			dst16[ 2] = mask_filter(&src16[4]);
-			dst16[ 3] = mask_filter(&src16[6]);
+			dst16[ 0] = RGB16_AVG(&src16[0]);
+			dst16[ 1] = RGB16_AVG(&src16[2]);
+			dst16[ 2] = RGB16_AVG(&src16[4]);
+			dst16[ 3] = RGB16_AVG(&src16[6]);
 
-			dst16[ 4] = mask_filter(&src16[8]);
-			dst16[ 5] = mask_filter(&src16[10]);
-			dst16[ 6] = mask_filter(&src16[12]);
-			dst16[ 7] = mask_filter(&src16[14]);
+			dst16[ 4] = RGB16_AVG(&src16[8]);
+			dst16[ 5] = RGB16_AVG(&src16[10]);
+			dst16[ 6] = RGB16_AVG(&src16[12]);
+			dst16[ 7] = RGB16_AVG(&src16[14]);
 
-			dst16[ 8] = mask_filter(&src16[16]);
-			dst16[ 9] = mask_filter(&src16[18]);
-			dst16[10] = mask_filter(&src16[20]);
-			dst16[11] = mask_filter(&src16[22]);
+			dst16[ 8] = RGB16_AVG(&src16[16]);
+			dst16[ 9] = RGB16_AVG(&src16[18]);
+			dst16[10] = RGB16_AVG(&src16[20]);
+			dst16[11] = RGB16_AVG(&src16[22]);
 
-			dst16[12] = mask_filter(&src16[24]);
-			dst16[13] = mask_filter(&src16[26]);
-			dst16[14] = mask_filter(&src16[28]);
-			dst16[15] = mask_filter(&src16[30]);
+			dst16[12] = RGB16_AVG(&src16[24]);
+			dst16[13] = RGB16_AVG(&src16[26]);
+			dst16[14] = RGB16_AVG(&src16[28]);
+			dst16[15] = RGB16_AVG(&src16[30]);
 		#endif
 
 			dst16 += 16;
