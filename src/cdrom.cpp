@@ -634,7 +634,7 @@ void cdrInterrupt()
 				cdr.Seeked = SEEK_DONE;
 			}
 			if (cdr.SetlocPending) {
-				seekTime = abs(msf2sec(cdr.SetSectorPlay) - msf2sec(cdr.SetSector)) * (cdReadTime / 200);
+				seekTime = abs((int)(msf2sec(cdr.SetSectorPlay) - msf2sec(cdr.SetSector)) * (cdReadTime / 200));
 				if(seekTime > 1000000) seekTime = 1000000;
 				memcpy(cdr.SetSectorPlay, cdr.SetSector, 4);
 				cdr.SetlocPending = 0;
